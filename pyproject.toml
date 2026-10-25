@@ -11,6 +11,8 @@ dependencies = [
   "deno>=2.0",                   # the JavaScript runtime yt-dlp needs for YouTube
   "keyring>=25",                 # secrets in the system key store (Windows Credential Manager, Keychain, Secret Service)
   "cryptography>=42",            # remote settings: keys arrive encrypted with this runner's own RSA key (7d)
+  # Intel Macs: cryptography ships x86_64 macOS wheels only up to 48 (49+ would be built from source with Rust)
+  "cryptography<49; sys_platform == 'darwin' and platform_machine == 'x86_64'",
 ]
 
 [project.optional-dependencies]
