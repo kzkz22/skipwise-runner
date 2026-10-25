@@ -472,3 +472,30 @@ def test_windows_loads_the_window_icon_like_pywebview():
     icon = Icon(str(main.icon_file("ico")))
     assert icon.Width > 0
     icon.Dispose()
+
+
+def test_tray_changes_go_to_the_main_thread_on_macos(monkeypatch):
+    """AppKit crashes when the menu-bar icon is touched from another thread (a Mac report, 2026-10-25)."""
+    import sys
+    import types
+    from dwyt_runner.app import tray
+    queued = []
+    helper = types.SimpleNamespace(callAfter=queued.append)
+    monkeypatch.setitem(sys.modules, "PyObjCTools", types.SimpleNamespace(AppHelper=helper))
+    monkeypatch.setitem(sys.modules, "PyObjCTools.AppHelper", helper)
+    ran = []
+    monkeypatch.setattr(sys, "platform", "darwin")
+    tray.on_main(lambda: ran.append("mac"))
+    assert ran == [] and len(queued) == 1
+    queued[0]()
+    assert ran == ["mac"]
+    monkeypatch.setattr(sys, "platform", "win32")
+    tray.on_main(lambda: ran.append("now"))
+    assert ran == ["mac", "now"]
+
+
+def test_on_macos_the_tray_starts_on_the_main_thread_before_the_window():
+    import inspect
+    from dwyt_runner.app import main
+    src = inspect.getsource(main.run)
+    assert src.index('tray.start() if sys.platform == "darwin"') < src.index("webview.start(func=started")

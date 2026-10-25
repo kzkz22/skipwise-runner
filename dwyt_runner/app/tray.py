@@ -9,6 +9,7 @@ paired. Where no tray exists (some Linux desktops) the app runs on without it; a
 from __future__ import annotations
 
 import logging
+import sys
 import threading
 from collections.abc import Callable
 from typing import Any
@@ -52,6 +53,19 @@ def image(colour: str, size: int = 64):
     d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(255, 255, 255, 255))
     d.ellipse((cx - r + ring, cy - r + ring, cx + r - ring, cy + r - ring), fill=COLOURS[colour] + (255,))
     return img
+
+
+def on_main(fn: Callable[[], None]) -> None:
+    """macOS allows AppKit (the menu-bar icon) only on the main thread: changes from the polling thread are handed
+    to the run loop there; elsewhere they run at once."""
+    if sys.platform == "darwin":
+        try:
+            from PyObjCTools import AppHelper
+            AppHelper.callAfter(fn)
+            return
+        except ImportError:
+            pass
+    fn()
 
 
 class Tray:
@@ -100,12 +114,15 @@ class Tray:
                 log.debug("tray update", exc_info=True)
 
     def update(self, s: dict[str, Any]) -> None:
+        on_main(lambda: self._update(s))
+
+    def _update(self, s: dict[str, Any]) -> None:
         colour, tip = state_of(s)
         if self.icon is None:
             return
         if colour != self.colour:
             if colour == "red":
-                self.notify(tip.removeprefix(_("Skipwise futtató – ")))
+                self._notify(tip.removeprefix(_("Skipwise futtató – ")))
             self.icon.icon = image(colour)
             self.colour = colour
         if tip != getattr(self, "tooltip", ""):
@@ -114,6 +131,9 @@ class Tray:
             self.icon.update_menu()
 
     def notify(self, text: str) -> None:
+        on_main(lambda: self._notify(text))
+
+    def _notify(self, text: str) -> None:
         try:
             if self.icon is not None and getattr(self.icon, "HAS_NOTIFICATION", False):
                 self.icon.notify(text, _("Skipwise futtató"))

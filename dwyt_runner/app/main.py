@@ -244,8 +244,15 @@ def run(browser: bool = False, hidden: bool = False, after: int = 0) -> int:
                 return False
 
             window.events.closing += closing
-            webview.start(func=lambda: tray.start() or (hidden and show()),  # no tray: never start unseen
-                          **window_icon(webview))
+            # macOS: AppKit objects (the menu-bar icon) only on the main thread, before the run loop starts;
+            # elsewhere the icon starts with the window (webview.start's func runs in a thread of its own)
+            mac_tray = tray.start() if sys.platform == "darwin" else None
+
+            def started() -> None:
+                up = mac_tray if mac_tray is not None else tray.start()
+                if not up and hidden:  # no tray: never start unseen
+                    show()
+            webview.start(func=started, **window_icon(webview))
         else:
             has_tray = tray.start()
             if not hidden or not has_tray:
