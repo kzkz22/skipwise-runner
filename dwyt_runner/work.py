@@ -116,7 +116,8 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
                 central.download(media_path, dest, cfg.max_file_mb * 1024 ** 2)
             except CentralError as exc:
                 raise WorkError(str(exc), "later") from exc
-            if cfg.keep_originals and media.file_sha256(dest) == sha:  # plan 19c: the "Eredetik" folder
+            # plan 19c: the "Eredetik" folder; only the owner's own uploads (a shared runner keeps nobody else's)
+            if cfg.keep_originals and source.get("keep") is True and media.file_sha256(dest) == sha:
                 dest, removed = originals.keep(cfg, sha, name, dest)
                 reports.append(removed)
             return dest

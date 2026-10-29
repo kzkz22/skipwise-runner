@@ -206,6 +206,12 @@ def test_uploads_are_kept_and_used_again_without_download(cfg, central, whisper,
     central.files[70] = data
     job = {"source": {"kind": "upload", "sha256": sha, "name": "megbeszélés.WAV", "size": len(data),
                       "media": "/runner/v1/jobs/70/media"}, "options": {"mode": "local", "model": "large-v3"}}
+    central.files[69] = data  # another user's upload on a shared runner (no keep: true): not kept
+    central.add_job(69, "transcribe", {"source": {**job["source"], "media": "/runner/v1/jobs/69/media"},
+                                       "options": job["options"]})
+    _run_once(cfg, central)
+    assert central.results[69]["transcript"]["mode"] == "local" and not originals.folder().exists()
+    job["source"]["keep"] = True
     central.add_job(70, "transcribe", job)
     _run_once(cfg, central)
     assert central.results[70]["transcript"]["mode"] == "local"
