@@ -129,7 +129,7 @@ def test_wrong_litellm_key_says_which_setting_to_fix(cfg, central, llm):
 def test_capabilities_follow_the_settings():
     from dwyt_runner.config import Config
     caps = work.capabilities(Config())
-    assert caps["kinds"] == ["transcribe"] and caps["transcribe_modes"] == ["captions"]
+    assert caps["kinds"] == ["transcribe", "drop_original"] and caps["transcribe_modes"] == ["captions"]
     assert caps["allowed_domains"] == config.DEFAULT_DOMAINS and "telex.hu" in caps["allowed_domains"]
 
 
@@ -271,7 +271,7 @@ def test_uploaded_file_is_downloaded_checked_and_transcribed(cfg, central, whisp
     assert res["transcript"]["mode"] == "local"
     assert whisper.requests[0]["size"] > 0
     caps = central.claims[0]["capabilities"]
-    assert caps["source_kinds"] == ["upload"]
+    assert caps["source_kinds"] == ["upload", "local"]  # kept originals are local files (plan 19c)
 
 
 def test_upload_with_wrong_content_or_bad_link_fails(cfg, central, whisper):
@@ -336,7 +336,7 @@ def test_watched_file_that_disappeared_fails_clearly(cfg, central, whisper, audi
     watch.scan(cfg, client)
     rec.unlink()
     _run_once(cfg, central)
-    assert "nincs meg a figyelt mappában" in central.failures[101]["error"]
+    assert "nincs meg ezen a gépen" in central.failures[101]["error"]
 
 
 # ---- chosen models, progress --------------------------------------------------------------

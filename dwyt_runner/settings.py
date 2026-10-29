@@ -150,6 +150,11 @@ SETTINGS: tuple[Setting, ...] = (
       advanced=True),
     S("watch_summarize", "bool", "sources", N_("Figyelt mappák: összefoglaló"), N_("Az átírás után összefoglaló is "
       "készül.")),
+    S("keep_originals", "bool", "sources", N_("Feltöltött felvételek megőrzése"), N_("A böngészőből feltöltött saját "
+      "felvételt a futtató az Eredetik mappában megtartja, így újraíráshoz nem kell újra feltölteni. A Skipwise-ban az "
+      "elem oldalán vagy a Beállításokban törölhető.")),
+    S("originals_max_gb", "int", "sources", N_("Eredetik: legfeljebb"), N_("Fölötte a legrégebben használt eredeti "
+      "törlődik."), min=1, max=100000, unit=N_("GB"), show_if=(("keep_originals", True),)),
     S("max_file_mb", "int", "sources", N_("Legnagyobb fájl"), "", min=1, max=100000, unit=N_("MB"), advanced=True),
     S("max_duration_min", "int", "sources", N_("Leghosszabb felvétel"), "", min=1, max=1440, unit=N_("perc"),
       advanced=True),

@@ -113,6 +113,15 @@ class Central:
             return None
         return resp.json()
 
+    def originals(self, body: dict[str, Any]) -> bool:
+        """The kept originals (plan 19c); False: an older central that does not know them."""
+        resp = self._call("PUT", "/runner/v1/originals", json=body, timeout=30)
+        if resp.status_code == 404:
+            return False
+        if resp.status_code != 200:
+            raise CentralError(_message(resp))
+        return True
+
     def result(self, job_id: int, result: dict[str, Any]) -> dict[str, Any]:
         resp = self._call("PUT", f"/runner/v1/jobs/{job_id}/result", json=result, timeout=300)
         if resp.status_code != 200:

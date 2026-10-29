@@ -149,7 +149,8 @@ def _header(job_input: dict[str, Any], hungarian: bool) -> str:
     return "\n".join(parts) + "\n\n" if parts else ""
 
 
-def parse(text: str) -> dict[str, Any] | None:
+def parse_object(text: str, keys: tuple[str, ...]) -> dict[str, Any] | None:
+    """The JSON object in a model's answer (code fences and words around it allowed) with a list under one of keys."""
     found = re.search(r"\{.*\}", text or "", re.S)
     if not found:
         return None
@@ -157,9 +158,13 @@ def parse(text: str) -> dict[str, Any] | None:
         data = json.loads(found.group(0))
     except ValueError:
         return None
-    if not isinstance(data, dict) or not any(isinstance(data.get(k), list) for k in LIMITS):
+    if not isinstance(data, dict) or not any(isinstance(data.get(k), list) for k in keys):
         return None
     return data
+
+
+def parse(text: str) -> dict[str, Any] | None:
+    return parse_object(text, tuple(LIMITS))
 
 
 def _text(value: Any, limit: int) -> str | None:

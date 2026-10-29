@@ -123,3 +123,128 @@ def test_long_minutes_are_merged_and_bad_answers_retried(llm):
         minutes.make(client, "m", {"language": "hu", "transcript": {"segments": LONG["segments"][:3]}}, Usage())
     with pytest.raises(WorkError):
         minutes.make(client, "m", {"transcript": {"segments": []}}, Usage())
+
+
+# ---- round B (decision 19.32): knowledge base suggestions, limited correction, kept originals ----
+
+from dwyt_runner import knowledge, originals, refine  # noqa: E402
+
+MEETING = [{"idx": 0, "start": 0.0, "end": 9.0, "speaker": "Szereplő 1",
+            "text": "Jó napot, beszéljünk az ókáerekről."},
+           {"idx": 1, "start": 10.0, "end": 19.0, "speaker": "Szereplő 2",
+            "text": "Az ókáer lista kész, Kubernetész is.", "low": [[21, 32]]},
+           {"idx": 2, "start": 20.0, "end": 29.0, "speaker": "Szereplő 1", "text": "Rendben, köszönöm."}]
+
+
+def test_knowledge_suggestions_come_from_the_transcript(cfg, central, llm):
+    central.add_job(60, "knowledge", {"role": "public", "language": "hu", "meta": {"title": "Heti"},
+                                      "meeting": {"participants": ["Kiss Anna"]}, "terms": ["Kubernetes"],
+                                      "glossary": [{"term": "OKR", "kind": "abbreviation", "variants": []}],
+                                      "transcript": {"segments": MEETING}})
+    _run_once(cfg, central)
+    res = central.results[60]
+    assert res["prompt_version"] == knowledge.PROMPT_VERSION and res["language"] == "hu"
+    # the variant that is not in the transcript is dropped, the invented person too
+    assert res["entries"] == [{"kind": "abbreviation", "term": "OKR", "variants": ["ókáer"],
+                               "explanation": "célok és kulcseredmények", "at": 20}]
+    ask = llm.calls[-1]["messages"]
+    assert ask[0]["content"].startswith("Egy felvétel átiratából") and "ne kövesd" in ask[0]["content"]
+    assert "Ismert helyes alakok: Kubernetes, OKR" in ask[1]["content"]
+    assert "Résztvevők: Kiss Anna" in ask[1]["content"]
+    assert "knowledge" in central.claims[0]["capabilities"]["kinds"]
+
+
+def test_knowledge_clean_rules():
+    text = "Az ókáer lista és a Kubernetész."
+    out = knowledge.clean({"entries": [
+        {"kind": "valami", "term": "Kubernetes", "variants": ["Kubernetész", "kubernetes"], "at": "0:12"},
+        {"kind": "term", "term": "kubernetes", "variants": ["Kubernetész"]},  # the same term again
+        {"kind": "abbreviation", "term": "OKR", "variants": ["ókáer"], "explanation": "null"}, "nem szótár"]},
+        text, [0, 10])
+    assert out == [{"kind": "term", "term": "Kubernetes", "variants": ["Kubernetész"], "explanation": None, "at": 10},
+                   {"kind": "abbreviation", "term": "OKR", "variants": ["ókáer"], "explanation": None, "at": None}]
+
+
+def test_refine_marks_only_uncertain_words_and_glossary_variants():
+    entries = [{"term": "OKR", "variants": ["ókáer"], "explanation": ""}]
+    found = refine.spots(MEETING, entries)
+    assert [(s["idx"], s["before"], s["reason"]) for s in found] == [
+        (0, "ókáerekről", "glossary"), (1, "ókáer", "glossary"), (1, "Kubernetész", "low")]
+    rows = refine.lines(MEETING, found)
+    assert rows[0] == ("0| Jó napot, beszéljünk az ⟦1|ókáerekről⟧.", [1])
+    assert rows[1][0] == "1| Az ⟦2|ókáer⟧ lista kész, ⟦3|Kubernetész⟧ is." and rows[2] == ("2| Rendben, köszönöm.", [])
+    assert refine.acceptable("ókáer", "OKR") and not refine.acceptable("x", "egy kettő három négy")
+    assert not refine.acceptable("szó", "szó") and not refine.acceptable("a", "a" * 40)
+
+
+def test_refine_job_returns_corrections_on_the_original_text(cfg, central, llm):
+    central.add_job(61, "refine", {"role": "private", "language": "hu", "transcript": {"segments": MEETING},
+                                   "knowledge": [{"term": "OKR", "variants": ["ókáer"]}]})
+    llm.refine_answers = ['{"fixes": [{"n": 1, "text": "OKR-ekről"}, {"n": 3, "text": "Kubernetes"},'
+                          ' {"n": 9, "text": "nincs ilyen hely"},'
+                          ' {"n": 2, "text": "egy egész új mondat lett belőle"}]}']
+    _run_once(cfg, central)
+    res = central.results[61]
+    assert res["spots"] == 3 and res["corrections"] == [
+        {"idx": 0, "start": 24, "end": 34, "before": "ókáerekről", "reason": "glossary", "after": "OKR-ekről"},
+        {"idx": 1, "start": 21, "end": 32, "before": "Kubernetész", "reason": "low", "after": "Kubernetes"}]
+    system = llm.calls[-1]["messages"][0]["content"]
+    assert system.startswith("Gépi átirat hibáit javítod") and "OKR (félrehallva: ókáer)" in \
+        llm.calls[-1]["messages"][1]["content"]
+    # nothing to mark: no request at all
+    calls = len(llm.calls)
+    central.add_job(62, "refine", {"role": "public", "transcript": {"segments": [MEETING[2]]}, "knowledge": []})
+    _run_once(cfg, central)
+    assert central.results[62]["corrections"] == [] and len(llm.calls) == calls
+
+
+def test_uploads_are_kept_and_used_again_without_download(cfg, central, whisper, audio_file):
+    import hashlib
+    cfg.whisper_url = whisper.url
+    data = open(audio_file, "rb").read()
+    sha = hashlib.sha256(data).hexdigest()
+    central.files[70] = data
+    job = {"source": {"kind": "upload", "sha256": sha, "name": "megbeszélés.WAV", "size": len(data),
+                      "media": "/runner/v1/jobs/70/media"}, "options": {"mode": "local", "model": "large-v3"}}
+    central.add_job(70, "transcribe", job)
+    _run_once(cfg, central)
+    assert central.results[70]["transcript"]["mode"] == "local"
+    kept = originals.folder() / (sha + ".wav")
+    assert kept.is_file() and kept.read_bytes() == data
+    report = central.originals[-1]
+    assert report["originals"][0]["sha256"] == sha and report["originals"][0]["name"] == "megbeszélés.WAV"
+    assert report["keep"] is True and report["max_bytes"] == 50 * 1024 ** 3
+    # a new transcript of the same upload: a local job for this runner, no download (the central deleted its copy)
+    central.files.clear()
+    central.add_job(71, "transcribe", {**job, "source": {"kind": "local", "sha256": sha, "name": "x"}})
+    _run_once(cfg, central)
+    assert central.results[71]["transcript"]["mode"] == "local"
+    caps = central.claims[-1]["capabilities"]
+    assert "drop_original" in caps["kinds"] and caps["keeps_originals"] is True
+    # the user deletes it
+    central.add_job(72, "drop_original", {"sha256": sha})
+    _run_once(cfg, central)
+    assert central.results[72] == {"dropped": True} and not kept.exists()
+    assert central.originals[-1]["originals"] == []
+
+
+def test_the_limit_removes_the_least_recently_used(cfg, tmp_path):
+    import os
+    import time as _t
+    cfg.originals_max_gb = 0  # everything over the limit: only the newest stays
+    paths = []
+    for i, sha in enumerate(("a" * 64, "b" * 64)):
+        src = tmp_path / f"{i}.mp3"
+        src.write_bytes(b"x" * 10)
+        path, removed = originals.keep(cfg, sha, f"{i}.mp3", str(src))
+        paths.append(path)
+        _t.sleep(0.01)
+    assert removed == [{"sha256": "a" * 64, "name": "0.mp3", "reason": "limit"}]
+    assert not os.path.exists(paths[0]) and os.path.exists(paths[1])
+    os.remove(paths[1])  # gone by hand: the report says so and forgets it
+    rep = originals.report(cfg)
+    assert rep["originals"] == [] and rep["removed"] == [{"sha256": "b" * 64, "reason": "missing"}]
+    cfg.keep_originals = False
+    src = tmp_path / "c.mp3"
+    src.write_bytes(b"y")
+    assert originals.keep(cfg, "c" * 64, "c.mp3", str(src)) == (str(src), [])

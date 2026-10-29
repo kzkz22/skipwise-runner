@@ -8,15 +8,16 @@ import tempfile
 from typing import Any, Callable
 from urllib.parse import urlsplit
 
-from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, local, localllm, media, minutes,
-               modelinfo, resolve, summarize, tracks, translate, watch)
+from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, knowledge, local, localllm, media,
+               minutes, modelinfo, originals, refine, resolve, summarize, tracks, translate, watch)
 from .config import Config
 from .errors import WorkError
 from .llm import Llm
 from .protocol import Central, CentralError
 from .i18n import gettext as _
 
-KINDS = ("transcribe", "summarize", "translate", "ask", "categorize", "chapters", "minutes")
+LLM_KINDS = ("summarize", "translate", "ask", "categorize", "chapters", "minutes", "knowledge", "refine")
+KINDS = ("transcribe", *LLM_KINDS, "drop_original")
 
 
 def capabilities(cfg: Config) -> dict[str, Any]:
@@ -25,7 +26,10 @@ def capabilities(cfg: Config) -> dict[str, Any]:
     modes = ["captions"] + (["cloud"] if cfg.assemblyai_key else []) + (["local"] if local_whisper else [])
     roles = [r for r, model in (("public", cfg.llm_public_model), ("private", cfg.llm_private_model))
              if cfg.llm_url and model]
-    kinds = ["transcribe"] + (["summarize", "translate", "ask", "categorize", "chapters", "minutes"] if roles else [])
+    kinds = ["transcribe"] + (list(LLM_KINDS) if roles else [])
+    keeps = bool(cfg.keep_originals or originals.load())
+    if keeps:
+        kinds.append("drop_original")  # the user deletes a kept original from the dwyt pages
     info, server = modelinfo.cached(cfg) if roles else ({}, "")
     defaults = {"summarize": model_for(cfg, "summarize", "public"), "translate": model_for(cfg, "translate", "public"),
                 "ask": model_for(cfg, "ask", "public"), "private": cfg.llm_private_model}
@@ -35,7 +39,8 @@ def capabilities(cfg: Config) -> dict[str, Any]:
             "llm_defaults": {k: v for k, v in defaults.items() if v} if roles else {},
             "allowed_domains": cfg.allowed_domains, "local_sources": False,
             "whisper_models": whisper_models(cfg),
-            "source_kinds": ["upload"] + (["local"] if cfg.watch_dirs else []),
+            "source_kinds": ["upload"] + (["local"] if cfg.watch_dirs or keeps else []),
+            "keeps_originals": bool(cfg.keep_originals),
             "embedded_subtitles": True,  # captions mode on an own file: its embedded subtitles (19.12)
             # round 9: summaries, translations, chapters and answers in these languages (older runners: Hungarian)
             "content_languages": sorted(langs.TABLE) if roles else []}
@@ -92,6 +97,7 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
               cancelled: Callable[[], bool], central: Central | None) -> dict[str, Any]:
     """An own recording: uploaded to the central service, or a file of this runner's watched folder."""
     source, options = data["source"], data.get("options") or {}
+    reports: list[list[dict[str, Any]]] = []
     sha, name = str(source.get("sha256") or ""), str(source.get("name") or _("felvétel"))
     if not re.fullmatch(r"[0-9a-f]{64}", sha):
         raise WorkError(_("Hibás fájlazonosító a munkában."))
@@ -101,18 +107,25 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
             raise WorkError(_("Hibás letöltési cím a munkában."))
 
         def obtain(workdir: str) -> str:
+            kept = originals.path_for(sha)  # kept before: no download (the central may not have it any more)
+            if kept is not None:
+                return kept
             dest = os.path.join(workdir, "upload.bin")
             stage("download")
             try:
                 central.download(media_path, dest, cfg.max_file_mb * 1024 ** 2)
             except CentralError as exc:
                 raise WorkError(str(exc), "later") from exc
+            if cfg.keep_originals and media.file_sha256(dest) == sha:  # plan 19c: the "Eredetik" folder
+                dest, removed = originals.keep(cfg, sha, name, dest)
+                reports.append(removed)
             return dest
     else:
         def obtain(workdir: str) -> str:
-            path = watch.path_for(sha)
+            path = watch.path_for(sha) or originals.path_for(sha)
             if path is None:
-                raise WorkError(_("A fájl már nincs meg a figyelt mappában (áthelyezték vagy törölték)."))
+                raise WorkError(_("A fájl már nincs meg ezen a gépen (a figyelt mappából vagy az Eredetik közül "
+                                  "áthelyezték vagy törölték)."))
             return path
     fetch = media.from_file(name, sha, obtain, options)
     mode = options.get("mode")
@@ -127,6 +140,8 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
     report = fetch.report()
     if report is not None:
         result["tracks"] = report
+    if reports and central is not None:  # a newly kept original: the central shows it on the item page
+        originals.send(cfg, central, reports[-1])
     return result
 
 
@@ -158,6 +173,14 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
     kind, data = job.get("kind"), job.get("input") or {}
     if kind == "transcribe" and (data.get("source") or {}).get("kind") in ("upload", "local"):
         return _own_file(job, data, cfg, stage, cancelled, central)
+    if kind == "drop_original":  # the user deleted a kept original (plan 19c)
+        sha = str(data.get("sha256") or "")
+        if not originals.SHA.match(sha):
+            raise WorkError(_("Hibás fájlazonosító a munkában."))
+        dropped = originals.drop(sha)
+        if central is not None:
+            originals.send(cfg, central)
+        return {"dropped": dropped}
     if kind == "transcribe":
         source, options = data.get("source") or {}, data.get("options") or {}
         url = str(source.get("url") or "")
@@ -205,7 +228,7 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
             video["title"] = video.get("title") or page.title
             video["channel"] = video.get("channel") or page.site
         return result
-    if kind in ("summarize", "translate", "ask", "categorize", "chapters", "minutes"):
+    if kind in LLM_KINDS:
         cfg = localllm.effective(cfg)
         role = data.get("role")
         model = model_for(cfg, kind, role)
@@ -236,6 +259,10 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
             return chapters.run(data, llm, model, stage, progress=progress, context_tokens=context)
         if kind == "minutes":  # plan 19c round A
             return minutes.run(data, llm, model, stage, progress=progress, context_tokens=context)
+        if kind == "knowledge":  # plan 19c round B
+            return knowledge.run(data, llm, model, stage, progress=progress, context_tokens=context)
+        if kind == "refine":
+            return refine.run(data, llm, model, stage, progress=progress, context_tokens=context)
         if kind == "categorize":
             return categorize.run(data, llm, model, stage, progress=progress)
         if kind == "ask":

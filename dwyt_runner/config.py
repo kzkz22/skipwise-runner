@@ -101,6 +101,9 @@ class Config:
     watch_language: str = ""           # empty: detect
     watch_summarize: bool = True
     max_file_mb: int = 4096
+    # uploaded own recordings kept in the "Eredetik" folder for new transcripts (plan 19c, decision 19.32)
+    keep_originals: bool = True
+    originals_max_gb: int = 50
     max_duration_min: int = 360
     work_dir: str = ""
     # where the secrets above live: auto = the system key store when there is one, else this file

@@ -194,6 +194,8 @@ def loop(cfg: Config, stop: threading.Event, central: Central | None = None, onc
     i18n.apply(cfg)
     cfg = sync_settings(cfg, central)
     last_report = time.monotonic()
+    from . import originals
+    originals.send(cfg, central)  # the kept originals (plan 19c): the central shows them
     while not stop.is_set():
         if RELOAD.is_set():
             RELOAD.clear()
@@ -203,6 +205,7 @@ def loop(cfg: Config, stop: threading.Event, central: Central | None = None, onc
             caps = work.capabilities(cfg)
             last_caps = time.monotonic()
             log.info("settings reloaded; capabilities: %s", caps)
+            originals.send(cfg, central)
             cfg = sync_settings(cfg, central)  # a change made in the window: dwyt shows it (and logs it)
             last_report = time.monotonic()
         if time.monotonic() - last_report >= remote.REPORT_EVERY_S:

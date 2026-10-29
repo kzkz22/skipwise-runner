@@ -182,6 +182,16 @@ class FakeCentral:
                                                 "options": body["options"]})
             return {"item_id": 50, "job_id": job_id, "existing": False}
 
+        @app.put("/runner/v1/originals")
+        async def originals(request: Request):  # plan 19c: the kept originals
+            bad = check(request)
+            if bad:
+                return bad
+            if fake.no_originals:
+                return JSONResponse({"error": "not found"}, status_code=404)
+            fake.originals.append(await request.json())
+            return {"ok": True}
+
         @app.post("/runner/v1/jobs/{job_id}/fail")
         async def fail(job_id: int, request: Request):
             bad = check(request)
@@ -201,6 +211,7 @@ class FakeCentral:
         self.reports, self.changes, self.change_results, self.no_settings = [], [], {}, False
         self.partials, self.no_partial, self.stop_on_partial = [], False, set()
         self.languages = None  # the Dwyt-Languages claim header (round 9)
+        self.originals, self.no_originals = [], False
 
     def add_job(self, job_id: int, kind: str, data: dict) -> None:
         self.known.add(job_id)
@@ -321,6 +332,26 @@ class FakeLlm:
                     f'{{"start": "{st}", "title": "Rész {n + 1}"}}' for n, st in enumerate(stamps[::4])) + "]}")
                 return {"model": body["model"], "choices": [{"message": {"content": answer}}],
                         "usage": {"prompt_tokens": 30, "completion_tokens": 6}}
+            if system.startswith(("Egy felvétel átiratából szójegyzéket", "You make a glossary")):  # knowledge (19c B)
+                import re as _re
+                user = body["messages"][-1]["content"]
+                stamps = _re.findall(r"^\[([\d:]+)\] ", user, _re.M) or ["00:00"]
+                answer = (fake.knowledge_answers.pop(0) if fake.knowledge_answers else json.dumps({"entries": [
+                    {"kind": "abbreviation", "term": "OKR", "variants": ["ókáer", "nincs ilyen"],
+                     "explanation": "célok és kulcseredmények", "at": stamps[-1]},
+                    {"kind": "person", "term": "Kitalált Ember", "variants": [], "explanation": None, "at": None}]},
+                    ensure_ascii=False))
+                return {"model": body["model"], "choices": [{"message": {"content": answer}}],
+                        "usage": {"prompt_tokens": 30, "completion_tokens": 6}}
+            if system.startswith(("Gépi átirat hibáit javítod", "You correct errors")):  # refine (19c B)
+                import re as _re
+                user = body["messages"][-1]["content"]
+                marks = _re.findall(r"⟦(\d+)\|([^⟧]*)⟧", user)
+                answer = (fake.refine_answers.pop(0) if fake.refine_answers else json.dumps({"fixes": [
+                    {"n": int(n), "text": "OKR" + t[5:] if t.lower().startswith("ókáer") else t.upper()}
+                    for n, t in marks]}, ensure_ascii=False))
+                return {"model": body["model"], "choices": [{"message": {"content": answer}}],
+                        "usage": {"prompt_tokens": 25, "completion_tokens": 5}}
             if system.startswith(("Megbeszélésről vagy előadásról", "You write the minutes")):  # minutes (19c)
                 import re as _re
                 user = body["messages"][-1]["content"]
@@ -368,6 +399,8 @@ class FakeLlm:
         self.info, self.info_calls = None, 0  # /model/info rows (LiteLLM); None = not a LiteLLM
         self.category_answers: list[str] = []
         self.minutes_answers: list[str] = []
+        self.knowledge_answers: list[str] = []
+        self.refine_answers: list[str] = []
         self.chapter_answers: list[str] = []
 
 
