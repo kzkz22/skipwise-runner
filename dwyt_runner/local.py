@@ -41,6 +41,10 @@ def _query(options: dict[str, Any], model: str) -> dict[str, str]:
     for key in ("num_speakers", "min_speakers", "max_speakers"):
         if options.get(key):
             q[key] = str(int(options[key]))
+    from . import terms
+    prompt, _left_out = terms.prompt_list(terms.clean(options.get("terms")))
+    if prompt:  # WhisperX applies the initial prompt to every chunk (no previous text: condition_on_previous_text off)
+        q["prompt"] = prompt
     return q
 
 
@@ -152,8 +156,11 @@ def run(fetch: media.Fetch | str, options: dict[str, Any], cfg: Config, stage: C
     segments = formatting.clean_segments(raw.get("segments") or [])
     if not segments:
         raise WorkError(_("A hangban nem volt felismerhető beszéd."))
+    segments, repeats = formatting.drop_repeats(segments)  # Whisper's repetition loops (19c round A)
     diarized = bool(raw.get("diarized")) and any(seg.get("speaker") for seg in segments)
     warnings = [str(w) for w in raw.get("warnings") or []][:20]
+    if repeats:
+        warnings.append(_("Az átiratból {n} ismétlődő részt kihagytam (a Whisper ismétlő hurka).").format(n=repeats))
     speakers: list[dict] = []
     if diarized:
         speakers = formatting.relabel_speakers(segments, formatting.speaker_word(language),

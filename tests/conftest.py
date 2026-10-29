@@ -2,6 +2,7 @@
 OpenAI-compatible LLM server. Everything runs on localhost; no network, any OS."""
 from __future__ import annotations
 
+import json
 import os
 import socket
 import subprocess
@@ -320,6 +321,18 @@ class FakeLlm:
                     f'{{"start": "{st}", "title": "Rész {n + 1}"}}' for n, st in enumerate(stamps[::4])) + "]}")
                 return {"model": body["model"], "choices": [{"message": {"content": answer}}],
                         "usage": {"prompt_tokens": 30, "completion_tokens": 6}}
+            if system.startswith(("Megbeszélésről vagy előadásról", "You write the minutes")):  # minutes (19c)
+                import re as _re
+                user = body["messages"][-1]["content"]
+                stamps = _re.findall(r"^\[([\d:]+)\] ", user, _re.M) or ["00:00"]
+                answer = (fake.minutes_answers.pop(0) if fake.minutes_answers else json.dumps({
+                    "takeaways": [{"text": f"Tanulság {stamps[0]}", "at": stamps[0]}],
+                    "decisions": [{"text": "Marad a régi rend.", "by": "nincs megadva", "at": stamps[-1]}],
+                    "tasks": [{"task": "Ajánlatot kér.", "owner": "Szereplő 2", "due": "péntek", "at": stamps[0]}],
+                    "next_steps": [], "open_questions": [{"text": "Mennyibe kerül?", "to": None, "at": None}]},
+                    ensure_ascii=False))
+                return {"model": body["model"], "choices": [{"message": {"content": answer}}],
+                        "usage": {"prompt_tokens": 40, "completion_tokens": 8}}
             answer = "<think>hmm</think>## Összefoglaló\nKert."
             return {"model": body["model"], "choices": [{"message": {"content": answer}}],
                     "usage": {"prompt_tokens": 50, "completion_tokens": 5}}
@@ -354,6 +367,7 @@ class FakeLlm:
         self.stream, self.stall_s, self.cut, self.piece_delay = True, 0.0, False, 0.0
         self.info, self.info_calls = None, 0  # /model/info rows (LiteLLM); None = not a LiteLLM
         self.category_answers: list[str] = []
+        self.minutes_answers: list[str] = []
         self.chapter_answers: list[str] = []
 
 

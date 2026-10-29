@@ -310,17 +310,60 @@ def device_of(log: str) -> str:
     return "cpu" if not re.search(r"using (CUDA|Vulkan|Metal)\S* backend", log) else "gpu"
 
 
+_FLAGS: dict[str, bool] = {}
+
+
+def supports(cli: str, flag: str) -> bool:
+    """Whether this whisper-cli knows a flag (its --help lists it); asked once per program."""
+    key = f"{cli}\0{flag}"
+    if key not in _FLAGS:
+        try:
+            out = subprocess.run([cli, "--help"], capture_output=True, text=True, timeout=30,
+                                 encoding="utf-8", errors="replace", **_no_window())
+            _FLAGS[key] = flag in (out.stdout or "") + (out.stderr or "")
+        except (OSError, subprocess.SubprocessError):
+            _FLAGS[key] = False
+    return _FLAGS[key]
+
+
+def word_p(seg: dict) -> float | None:
+    """A word's probability: the lowest probability of its text tokens (-ojf output); None without tokens."""
+    ps = []
+    for tok in seg.get("tokens") or []:
+        text = str(tok.get("text") or "")
+        if text.startswith("[_") or not text.strip() or tok.get("p") is None:
+            continue
+        try:
+            ps.append(float(tok["p"]))
+        except (TypeError, ValueError):
+            continue
+    return min(ps) if ps else None
+
+
 def transcribe_text(wav: str, model: Path, vad: Path, language: str | None, cfg: Config, workdir: str,
                     stage: Callable[[str], None], cancelled: Callable[[], bool],
-                    deadline: float) -> tuple[list[dict], str, str, list[str], float]:
-    """(words with start/end, language, device, warnings, model load seconds)."""
+                    deadline: float, term_list: list[str] | None = None
+                    ) -> tuple[list[dict], str, str, list[str], float]:
+    """(words with start/end/p, language, device, warnings, model load seconds)."""
+    from . import terms
     cli = whisper_cli(cfg, stage)
     base = os.path.join(workdir, "whisper")
-    args = [cli, "-m", str(model), "-f", wav, "-l", language or "auto", "-ml", "1", "-sow", "-oj", "-of", base,
-            "-pp", "--vad", "-vm", str(vad), "-mc", "0"]
+    args = [cli, "-m", str(model), "-f", wav, "-l", language or "auto", "-ml", "1", "-sow", "-ojf", "-of", base,
+            "-pp", "--vad", "-vm", str(vad)]
+    warnings: list[str] = []
+    prompt, left_out = terms.whisper_cpp_prompt(term_list or [])
+    if prompt and supports(cli, "--carry-initial-prompt"):
+        # the terms fill the whole prompt budget, so no previous text gets in (that is what -mc 0 kept out)
+        args += ["--prompt", prompt, "--carry-initial-prompt"]
+        if left_out:
+            warnings.append(_("A szakszavak közül {n} nem fért a Whisper promptjába.").format(n=left_out))
+    else:
+        args += ["-mc", "0"]
+        if prompt:
+            warnings.append(_("Ez a whisper.cpp régebbi, ezért a szakszavakat nem kapta meg; frissítsd a futtatót "
+                              "vagy a whisper-cli-t."))
     if cfg.whisper_threads:
         args += ["-t", str(cfg.whisper_threads)]
-    warnings: list[str] = []
     stage("transcribe")
     code, log = run_cli(args, stage, cancelled, deadline)
     device = device_of(log)
@@ -338,7 +381,8 @@ def transcribe_text(wav: str, model: Path, vad: Path, language: str | None, cfg:
         if not text or text.startswith("[_") or text.startswith("[BLANK"):
             continue
         off = seg.get("offsets") or {}
-        words.append({"text": text, "start": off.get("from", 0) / 1000, "end": off.get("to", 0) / 1000})
+        words.append({"text": text, "start": off.get("from", 0) / 1000, "end": off.get("to", 0) / 1000,
+                      "p": word_p(seg)})
     load = LOAD_TIME.search(log)  # whisper_print_timings: the model's loading, not the audio's length
     return words, found, device, warnings, float(load.group(1)) / 1000 if load else 0.0
 
@@ -400,8 +444,10 @@ def transcribe(src: str, options: dict[str, Any], model_name: str, cfg: Config, 
     gpuswap.before_whisper(cfg, stage, cancelled)  # one video card: the language model makes room
     swap_s = time.monotonic() - swap_started
     try:
+        from . import terms
         words, language, device, warnings, load_s = transcribe_text(wav, model, vad, options.get("language"), cfg,
-                                                            workdir, stage, cancelled, deadline)
+                                                            workdir, stage, cancelled, deadline,
+                                                            terms.clean(options.get("terms")))
     finally:
         gpuswap.after_whisper()
     diarized = False

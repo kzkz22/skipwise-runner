@@ -17,6 +17,9 @@ FAKE_CLI = r'''#!{python}
 import json, os, sys
 args = sys.argv[1:]
 if "--help" in args:
+    if not os.environ.get("FAKE_WHISPER_OLD"):
+        sys.stderr.write("  --prompt PROMPT  [       ] initial prompt\n"
+                         "  --carry-initial-prompt [false] always prepend\n")
     sys.exit(0)
 log = os.environ["FAKE_WHISPER_LOG"]
 open(log, "a", encoding="utf-8").write(" ".join(args) + "\n")
@@ -33,7 +36,10 @@ for p in (10, 60, 100):
     sys.stderr.write("whisper_print_progress_callback: progress = %d%%\n" % p)
 base = args[args.index("-of") + 1]
 words = ["Sziasztok!", "Hova", "utaznál?", "Berlinbe", "megyek."]
-segs = [{{"text": " " + w, "offsets": {{"from": i * 2000, "to": i * 2000 + 1500}}}} for i, w in enumerate(words)]
+probs = [0.9, 0.95, 0.8, 0.2, 0.9]  # "Berlinbe" is uncertain
+segs = [{{"text": " " + w, "offsets": {{"from": i * 2000, "to": i * 2000 + 1500}},
+         "tokens": [{{"text": "[_BEG_]", "p": 0.01}}, {{"text": " " + w, "p": probs[i]}}]}}
+        for i, w in enumerate(words)]
 segs.insert(0, {{"text": "[_BEG_]", "offsets": {{"from": 0, "to": 0}}}})
 sys.stderr.write("whisper_print_timings:     load time =  1500.00 ms\n")
 lang = args[args.index("-l") + 1]
@@ -90,10 +96,11 @@ def test_local_job_on_this_machine(builtin, audio_file):
     assert [(s["speaker"], s["text"]) for s in t["segments"]] == [
         ("Szereplő 1", "Sziasztok!"), ("Szereplő 1", "Hova utaznál?"), ("Szereplő 2", "Berlinbe megyek.")]
     assert [s["label"] for s in t["speakers"]] == ["Szereplő 1", "Szereplő 2"]
+    assert t["segments"][2]["low"] == [[0, 8]] and "low" not in t["segments"][0]  # "Berlinbe": p 0.2
     assert t["warnings"] == []  # it ran on the "video card"
     assert turns == [(None, 0.8)]
     args = log.read_text(encoding="utf-8").split()
-    for flag in ("--vad", "-vm", "-mc", "-ml", "-sow", "-oj", "-pp"):
+    for flag in ("--vad", "-vm", "-mc", "-ml", "-sow", "-ojf", "-pp"):
         assert flag in args
     assert args[args.index("-l") + 1] == "auto" and args[args.index("-mc") + 1] == "0"
     assert "ggml-silero" in args[args.index("-vm") + 1]
@@ -113,6 +120,27 @@ def test_speaker_count_language_threshold_and_no_speakers(builtin, audio_file):
     raw = whispercpp.transcribe(audio_file, {"diarize": False}, "large-v3", cfg, str(Path(log).parent),
                                 lambda s: None, lambda: False, 600)
     assert raw["diarized"] is False and len(turns) == 2
+
+
+def test_terms_fill_the_prompt_and_an_old_program_is_told(builtin, audio_file, monkeypatch):
+    """19c round A: the user's terms go into the initial prompt, padded so no previous text gets in."""
+    cfg, log, turns = builtin
+    whispercpp._FLAGS.clear()
+    out = whispercpp.transcribe(audio_file, {"terms": ["Kovács Ödön", "Kubernetes", "kubernetes", " OKR, KPI "]},
+                                "large-v3", cfg, str(Path(log).parent), lambda s: None, lambda: False, 600)
+    line = log.read_text(encoding="utf-8").splitlines()[-1]
+    assert "--carry-initial-prompt" in line and "-mc" not in line.split()
+    assert "Kovács Ödön, Kubernetes, OKR KPI." in line and line.count("Kubernetes") >= 10  # repeated to fill
+    assert out["warnings"] == []
+    # an older whisper-cli without --carry-initial-prompt: no prompt, -mc 0 as before, and a warning
+    whispercpp._FLAGS.clear()
+    monkeypatch.setenv("FAKE_WHISPER_OLD", "1")
+    out = whispercpp.transcribe(audio_file, {"terms": ["Kubernetes"]}, "large-v3", cfg, str(Path(log).parent),
+                                lambda s: None, lambda: False, 600)
+    args = log.read_text(encoding="utf-8").splitlines()[-1].split()
+    assert "--prompt" not in args and args[args.index("-mc") + 1] == "0"
+    assert any("régebbi" in w for w in out["warnings"])
+    whispercpp._FLAGS.clear()
 
 
 def test_failed_gpu_run_is_repeated_on_the_processor(builtin, audio_file, tmp_path, monkeypatch):

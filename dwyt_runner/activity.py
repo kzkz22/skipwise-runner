@@ -12,7 +12,8 @@ from .i18n import gettext as _
 from .i18n import N_, labels
 
 KIND_LABELS = labels({"transcribe": N_("Átírás"), "summarize": N_("Összefoglaló"), "translate": N_("Fordítás"),
-                      "ask": N_("Kérdés"), "categorize": N_("Kategorizálás"), "chapters": N_("Fejezetek")})
+                      "ask": N_("Kérdés"), "categorize": N_("Kategorizálás"), "chapters": N_("Fejezetek"),
+                      "minutes": N_("Emlékeztető")})
 STAGE_LABELS = labels({
     "starting": N_("indul"), "download": N_("letöltés"), "captions": N_("felirat letöltése"),
     "prepare-audio": N_("hang előkészítése"), "upload": N_("feltöltés a felhőbe"), "transcribe": N_("átírás"),
@@ -20,7 +21,7 @@ STAGE_LABELS = labels({
     "download-model": N_("modell letöltése (első használat)"), "summarize": N_("összefoglaló írása"),
     "translate": N_("fordítás"), "ask": N_("válasz írása"), "write": N_("mentés"),
     "page": N_("felvétel keresése az oldalon"), "categorize": N_("kategória választása"),
-    "chapters": N_("fejezetek írása"),
+    "chapters": N_("fejezetek írása"), "minutes": N_("emlékeztető írása"),
 })
 HISTORY_MAX = 200
 _lock = threading.Lock()

@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 import httpx
 
-from . import formatting, media
+from . import formatting, media, terms
 from .config import Config
 from .errors import WorkError
 from .i18n import gettext as _
@@ -25,6 +25,7 @@ PRO_LANGUAGES = frozenset({"en", "es", "fr", "de", "it", "pt", "ar", "da", "nl",
                            "ja", "zh", "no", "sv", "tr", "vi"})
 PRICE_PER_HOUR = {"universal-2": 0.15, "universal-3-5-pro": 0.21}
 DIARIZATION_PER_HOUR = 0.02
+KEYTERMS_PER_HOUR = 0.05  # keyterms_prompt add-on, both models (19c round A)
 TIMEOUT_S = 3600
 
 
@@ -43,8 +44,9 @@ def resolve_model(requested: str | None, language: str | None) -> str:
     return MODELS[requested]
 
 
-def estimate_cost(api_model: str, seconds: float, diarize: bool) -> float:
-    rate = PRICE_PER_HOUR.get(api_model, 0) + (DIARIZATION_PER_HOUR if diarize else 0)
+def estimate_cost(api_model: str, seconds: float, diarize: bool, keyterms: bool = False) -> float:
+    rate = (PRICE_PER_HOUR.get(api_model, 0) + (DIARIZATION_PER_HOUR if diarize else 0)
+            + (KEYTERMS_PER_HOUR if keyterms else 0))
     return round(rate * max(seconds, 0) / 3600, 4)
 
 
@@ -83,6 +85,9 @@ def _request_body(options: dict[str, Any], api_model: str, upload_url: str) -> d
         body["language_code"], body["language_detection"] = options["language"], False
     else:
         body["language_detection"] = True
+    phrases = terms.keyterms(terms.clean(options.get("terms")), api_model)
+    if phrases:  # the user's names and technical words (19c round A)
+        body["keyterms_prompt"] = phrases
     if diarize and options.get("num_speakers"):
         body["speakers_expected"] = int(options["num_speakers"])
     elif diarize and (options.get("min_speakers") or options.get("max_speakers")):
@@ -100,7 +105,7 @@ def _words(transcript: dict) -> list[dict]:
     else:
         source = transcript.get("words") or []
     return [{"text": w.get("text", ""), "start": (w.get("start") or 0) / 1000,
-             "end": (w.get("end") or 0) / 1000, "speaker": w.get("speaker")} for w in source]
+             "end": (w.get("end") or 0) / 1000, "speaker": w.get("speaker"), "p": w.get("confidence")} for w in source]
 
 
 def run(fetch: media.Fetch | str, options: dict[str, Any], cfg: Config, stage: Callable[[str], None],
@@ -175,7 +180,8 @@ def run(fetch: media.Fetch | str, options: dict[str, Any], cfg: Config, stage: C
                                "speakers": speakers, "warnings": warnings, "segments": segments,
                                "elapsed_s": round(time.monotonic() - started, 1),
                                "cloud": {"provider": "assemblyai", "audio_seconds": seconds,
-                                         "estimated_cost_usd": estimate_cost(used, seconds, diarize),
+                                         "estimated_cost_usd": estimate_cost(used, seconds, diarize, bool(
+                                             terms.keyterms(terms.clean(options.get("terms")), used))),
                                          "deleted_at_provider": deleted}}}
     finally:
         if transcript_id and cfg.cloud_delete_after:

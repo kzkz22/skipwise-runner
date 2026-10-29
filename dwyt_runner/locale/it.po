@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-23 16:43+0200\n"
+"POT-Creation-Date: 2026-10-29 18:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -213,7 +213,7 @@ msgstr "; modello grande, il testo ungherese si avvicina a quello del cloud, ma 
 msgid "<!doctype html><html lang=\"hu\"><head><meta charset=\"utf-8\"><title>Skipwise futtató</title><link rel=\"stylesheet\" href=\"/static/style.css\"></head><body><main><h1>A futtató leállt</h1><p class=\"muted\">Nem vesz fel munkát, amíg újra nem indítod.</p></main></body></html>"
 msgstr "<!doctype html><html lang=\"it\"><head><meta charset=\"utf-8\"><title>Runner Skipwise</title><link rel=\"stylesheet\" href=\"/static/style.css\"></head><body><main><h1>Il runner si è fermato</h1><p class=\"muted\">Non accetta lavori finché non lo riavvii.</p></main></body></html>"
 
-#: local.py:57
+#: local.py:61
 #, python-brace-format
 msgid "A GPU-gép most nem indítható (HTTP {status_code}: {str}); később újrapróbálom."
 msgstr "La macchina GPU non può essere avviata ora (HTTP {status_code}: {str}); riproverò più tardi."
@@ -231,7 +231,7 @@ msgstr ""
 "Da ora il runner Skipwise resta nell'area di notifica (in basso a destra, l'icona blu di Skipwise con un pallino colorato di stato nell'angolo). Chiudere la finestra la nasconde soltanto;\n"
 "  per uscire usa il menu dell'icona."
 
-#: app/main.py:303
+#: app/main.py:310
 #, python-brace-format
 msgid ""
 "A Skipwise futtató nem indult el: {exc}\n"
@@ -272,36 +272,36 @@ msgstr "Impostabile anche da Skipwise:"
 msgid "A Tovább gomb akkor lesz aktív, ha a „kell” jelű részek megvannak."
 msgstr "Il pulsante Avanti si attiva quando le parti segnate «necessario» sono pronte."
 
-#: local.py:61
+#: local.py:65
 #, python-brace-format
 msgid "A Whisper-cím nem jó (HTTP 404): {str}. Ellenőrizd: skipwise-runner config set whisper_url http://AI-ROUTER:8080/upstream/whisper"
 msgstr "L'indirizzo di Whisper non è corretto (HTTP 404): {str}. Controlla: skipwise-runner config set whisper_url http://AI-ROUTER:8080/upstream/whisper"
 
-#: local.py:64
+#: local.py:68
 #, python-brace-format
 msgid "A Whisper-worker elutasította a munkát (HTTP {status_code}): {str}"
 msgstr "Il worker Whisper ha rifiutato il lavoro (HTTP {status_code}): {str}"
 
-#: local.py:114
+#: local.py:118
 msgid "A Whisper-worker eredmény nélkül zárta le a kapcsolatot (leállították vagy újraindult); később újrapróbálom."
 msgstr "Il worker Whisper ha chiuso la connessione senza risultato (fermato o riavviato); riproverò più tardi."
 
-#: local.py:96
+#: local.py:100
 #, python-brace-format
 msgid "A Whisper-worker hibát jelzett: {error}"
 msgstr "Il worker Whisper ha segnalato un errore: {error}"
 
-#: local.py:102
+#: local.py:106
 #, python-brace-format
 msgid "A Whisper-worker nem érhető el ({whisper_url}): {exc}. Be van kapcsolva az AI-router? Később újrapróbálom."
 msgstr "Il worker Whisper non è raggiungibile ({whisper_url}): {exc}. L'AI router è acceso? Riproverò più tardi."
 
-#: local.py:106
+#: local.py:110
 #, python-brace-format
 msgid "A Whisper-worker {FIRST_BYTE_S60} percig nem válaszolt; később újrapróbálom."
 msgstr "Il worker Whisper non ha risposto per {FIRST_BYTE_S60} minuti; riproverò più tardi."
 
-#: local.py:85
+#: local.py:89
 #, python-brace-format
 msgid "A Whisper-worker {limit_s60} perc alatt sem végzett; a munka leállt (whisper_timeout_min)."
 msgstr "Il worker Whisper non ha finito entro {limit_s60} minuti; il lavoro è stato interrotto (whisper_timeout_min)."
@@ -340,7 +340,7 @@ msgstr "L'avvio all'accesso è disattivato."
 msgid "A bejelentkezéskori indulást nem sikerült kikapcsolni: {exc}"
 msgstr "Impossibile disattivare l'avvio all'accesso: {exc}"
 
-#: whispercpp.py:365
+#: whispercpp.py:409
 msgid "A beszélő-szétválasztás beállítása hibás."
 msgstr "L'impostazione della separazione degli interlocutori è errata."
 
@@ -348,7 +348,7 @@ msgstr "L'impostazione della separazione degli interlocutori è errata."
 msgid "A beszélő-szétválasztó modell csomagjában nincs model.onnx."
 msgstr "Nel pacchetto del modello di separazione degli interlocutori manca model.onnx."
 
-#: whispercpp.py:352
+#: whispercpp.py:396
 msgid "A beszélők szétválasztásához hiányzik a sherpa-onnx. Telepítsd a futtatót a helyi kiegészítővel: uv tool install --force --python 3.13 \"dwyt-runner[local] @ https://github.com/kzkz22/skipwise-runner/archive/refs/heads/main.zip\""
 msgstr "Per separare gli interlocutori manca sherpa-onnx. Installa il runner con l'estensione locale: uv tool install --force --python 3.13 \"dwyt-runner[local] @ https://github.com/kzkz22/skipwise-runner/archive/refs/heads/main.zip\""
 
@@ -424,7 +424,7 @@ msgstr "Impossibile verificare gli aggiornamenti: {exc}"
 msgid "A futtató a következő két munka között telepíti."
 msgstr "Il runner lo installa tra i prossimi due lavori."
 
-#: app/main.py:253
+#: app/main.py:260
 #, python-brace-format
 msgid "A futtató ablaka a böngészőben: {url}"
 msgstr "La finestra del runner nel browser: {url}"
@@ -531,7 +531,7 @@ msgstr "Nome del computer (come appare in Skipwise)"
 msgid "A géped alapján "
 msgstr "In base al tuo computer, "
 
-#: cloud.py:159 local.py:154
+#: cloud.py:164 local.py:158
 msgid "A hangban nem volt felismerhető beszéd."
 msgstr "Nell'audio non c'era parlato riconoscibile."
 
@@ -708,7 +708,12 @@ msgstr "La chiave del tuo account AssemblyAI. La trascrizione nel cloud avviene 
 msgid "A saját felvételek szövege csak ehhez a modellhez kerül; helyi modell javasolt."
 msgstr "Il testo delle tue registrazioni va solo a questo modello; si consiglia un modello locale."
 
-#: cloud.py:164
+#: whispercpp.py:359
+#, python-brace-format
+msgid "A szakszavak közül {n} nem fért a Whisper promptjába."
+msgstr "{n} dei termini non sono entrati nel prompt di Whisper."
+
+#: cloud.py:169
 msgid "A szolgáltató nem adott beszélőket ehhez a felvételhez."
 msgstr "Il fornitore non ha restituito interlocutori per questa registrazione."
 
@@ -716,7 +721,7 @@ msgstr "Il fornitore non ha restituito interlocutori per questa registrazione."
 msgid "A telepítő lépései"
 msgstr "Passaggi di configurazione"
 
-#: cloud.py:40
+#: cloud.py:41
 #, python-brace-format
 msgid "A universal-3-5-pro nem támogatja ezt a nyelvet: {lang}. Válaszd az auto-t."
 msgstr "universal-3-5-pro non supporta questa lingua: {lang}. Scegli auto."
@@ -730,7 +735,7 @@ msgstr "Il video dura {int} minuti, più dei {max_duration_min} minuti impostati
 msgid "A videókártyán egyszerre csak egy nagy modell fér el. Amikor a futtató átír egy videót, kiveszi a memóriából az éppen betöltött nyelvi modellt; a következő kérésnél a modellszerver magától visszatölti. Ha közben te is beszélgetsz egy modellel, a válaszod lelassulhat vagy megszakadhat."
 msgstr "Sulla scheda video entra un solo modello grande alla volta. Quando il runner trascrive un video, toglie dalla memoria il modello linguistico caricato; il server di modelli lo ricarica alla richiesta successiva. Se nel frattempo stai chattando con un modello, la risposta può rallentare o interrompersi."
 
-#: whispercpp.py:328
+#: whispercpp.py:371
 msgid "A videókártyán nem sikerült, ezért a processzoron futott (lassabb)."
 msgstr "Sulla scheda video non è riuscito, quindi è stato eseguito sul processore (più lento)."
 
@@ -761,7 +766,7 @@ msgstr "Nel pacchetto whisper.cpp manca whisper-cli.exe ({name})."
 msgid "A whisper.cpp helye"
 msgstr "Percorso di whisper.cpp"
 
-#: whispercpp.py:332
+#: whispercpp.py:375
 #, python-brace-format
 msgid "A whisper.cpp hibával állt le ({code}): {log}"
 msgstr "whisper.cpp si è fermato con un errore ({code}): {log}"
@@ -779,7 +784,7 @@ msgstr "whisper.cpp non si è avviato: {exc}"
 msgid "A whisper.cpp és a beszélők szétválasztása ezen a gépen fut, a modelleket egyszer tölti le (kb. 3,5 GB). Videókártyával gyors, nélküle lassú."
 msgstr "whisper.cpp e la separazione degli interlocutori girano su questo computer; i modelli si scaricano una volta (circa 3,5 GB). Veloce con una scheda video, lento senza."
 
-#: local.py:165
+#: local.py:172
 msgid "A worker CPU-n futott (nem látott GPU-t)."
 msgstr "Il worker è stato eseguito sulla CPU (non ha visto GPU)."
 
@@ -866,7 +871,7 @@ msgstr "Il sito {urlsplit} non è tra i domini consentiti (allowed_domains)."
 msgid "A(z) {version} kiadásban nincs ilyen csomag ({asset_kind})."
 msgstr "La versione {version} non contiene questo pacchetto ({asset_kind})."
 
-#: app/tray.py:76
+#: app/tray.py:90
 msgid "Ablak megnyitása"
 msgstr "Apri finestra"
 
@@ -958,30 +963,30 @@ msgstr "Chiave AssemblyAI (trascrizione nel cloud)"
 msgid "AssemblyAI-kulcs: átírás és próba-összefoglaló"
 msgstr "Chiave AssemblyAI: trascrizione e riassunto di prova"
 
-#: cloud.py:140
+#: cloud.py:145
 msgid "Az AssemblyAI egy órán belül nem végzett."
 msgstr "AssemblyAI non ha finito entro un'ora."
 
-#: cloud.py:63
+#: cloud.py:65
 msgid "Az AssemblyAI elutasította a kulcsot; ellenőrizd: skipwise-runner config set assemblyai_key ..."
 msgstr "AssemblyAI ha rifiutato la chiave; controllala: skipwise-runner config set assemblyai_key ..."
 
-#: cloud.py:73
+#: cloud.py:75
 #, python-brace-format
 msgid "Az AssemblyAI hibát adott (HTTP {status_code}): {str}"
 msgstr "AssemblyAI ha restituito un errore (HTTP {status_code}): {str}"
 
-#: cloud.py:66
+#: cloud.py:68
 #, python-brace-format
 msgid "Az AssemblyAI most nem fogad kérést (HTTP {status_code})."
 msgstr "AssemblyAI al momento non accetta richieste (HTTP {status_code})."
 
-#: cloud.py:146
+#: cloud.py:151
 #, python-brace-format
 msgid "Az AssemblyAI nem tudta átírni a hangot: {get}"
 msgstr "AssemblyAI non è riuscito a trascrivere l'audio: {get}"
 
-#: cloud.py:60
+#: cloud.py:62
 #, python-brace-format
 msgid "Az AssemblyAI nem érhető el ({exc}); később újrapróbálom."
 msgstr "AssemblyAI non è raggiungibile ({exc}); riproverò più tardi."
@@ -1140,7 +1145,12 @@ msgstr "Non ho trovato video o audio nella pagina. Se la registrazione è anche 
 msgid "Az oldalon nincs YouTube-videó, így felirat sincs hozzá; válassz helyi vagy felhős átírást."
 msgstr "Nella pagina non c'è un video YouTube, quindi nemmeno sottotitoli; scegli la trascrizione locale o nel cloud."
 
-#: local.py:166
+#: local.py:163
+#, python-brace-format
+msgid "Az átiratból {n} ismétlődő részt kihagytam (a Whisper ismétlő hurka)."
+msgstr "Ho tolto dalla trascrizione {n} parti ripetute (ciclo di ripetizione di Whisper)."
+
+#: local.py:173
 msgid "Az átírás a processzoron futott."
 msgstr "La trascrizione è stata eseguita sul processore."
 
@@ -1258,15 +1268,19 @@ msgstr "Prima inserisci sopra la chiave AssemblyAI."
 msgid "Előbb párosítsd: skipwise-runner pair https://KÖZPONT-CÍME"
 msgstr "Prima abbinalo: skipwise-runner pair https://INDIRIZZO-CENTRALE"
 
+#: activity.py:16
+msgid "Emlékeztető"
+msgstr "Verbale"
+
 #: settings.py:134
 msgid "Engedélyezett oldalak"
 msgstr "Siti consentiti"
 
-#: cloud.py:112
+#: cloud.py:117
 msgid "Ennek a futtatónak nincs AssemblyAI-kulcsa (skipwise-runner config set assemblyai_key ...)."
 msgstr "Questo runner non ha una chiave AssemblyAI (skipwise-runner config set assemblyai_key ...)."
 
-#: local.py:124
+#: local.py:128
 msgid "Ennek a futtatónak nincs helyi Whispere (skipwise-runner config set whisper_url ..., vagy ezen a gépen: skipwise-runner config set whisper_builtin igen)."
 msgstr "Questo runner non ha un Whisper locale (skipwise-runner config set whisper_url ..., oppure su questo computer: skipwise-runner config set whisper_builtin igen)."
 
@@ -1323,6 +1337,10 @@ msgstr "È la più recente (%(checked_text)s)."
 msgid "Ez a választott mód képe; a"
 msgstr "Questa è la modalità scelta; si applica dopo"
 
+#: whispercpp.py:363
+msgid "Ez a whisper.cpp régebbi, ezért a szakszavakat nem kapta meg; frissítsd a futtatót vagy a whisper-cli-t."
+msgstr "Questo whisper.cpp è più vecchio e non ha ricevuto i termini; aggiorna il runner o whisper-cli."
+
 #: machine.py:617
 msgid "Ez csak becslés; a próbafuttatás méri meg, mennyire gyors ez a gép."
 msgstr "È solo una stima; la prova misura quanto è veloce questo computer."
@@ -1344,7 +1362,7 @@ msgstr "Puoi sceglierli anche nella pagina dell'elemento."
 msgid "Ezen a gépen nincs whisper-cli. Telepítsd (például a whisper.cpp csomagjából), vagy add meg a helyét: skipwise-runner config set whisper_cli /út/whisper-cli"
 msgstr "Su questo computer non c'è whisper-cli. Installalo (per esempio dal pacchetto whisper.cpp) o indica il percorso: skipwise-runner config set whisper_cli /percorso/whisper-cli"
 
-#: local.py:128
+#: local.py:132
 #, python-brace-format
 msgid "Ezt a Whisper-modellt a futtató nem ismeri: {model} (whisper_models: {join})."
 msgstr "Il runner non conosce questo modello Whisper: {model} (whisper_models: {join})."
@@ -1645,7 +1663,7 @@ msgstr "Modello Whisper sconosciuto: {name} ({known})."
 msgid "Ismeretlen cím."
 msgstr "Indirizzo sconosciuto."
 
-#: cloud.py:38
+#: cloud.py:39
 #, python-brace-format
 msgid "Ismeretlen felhős modell: {requested}."
 msgstr "Modello cloud sconosciuto: {requested}."
@@ -1654,7 +1672,7 @@ msgstr "Modello cloud sconosciuto: {requested}."
 msgid "Ismeretlen kulcs."
 msgstr "Chiave sconosciuta."
 
-#: work.py:242
+#: work.py:244
 #, python-brace-format
 msgid "Ismeretlen munkafajta: {kind}."
 msgstr "Tipo di lavoro sconosciuto: {kind}."
@@ -1700,15 +1718,15 @@ msgstr "Chi scrive il riassunto"
 msgid "Ki írja az összefoglalót, a fordítást és a válaszokat?"
 msgstr "Chi scrive riassunto, traduzione e risposte?"
 
-#: app/templates/base.html:25 app/tray.py:79
+#: app/templates/base.html:25 app/tray.py:93
 msgid "Kilépés"
 msgstr "Esci"
 
-#: app/main.py:255
+#: app/main.py:262
 msgid "Kilépés: az ablak Kilépés gombjával vagy Ctrl+C"
 msgstr "Uscita: pulsante Esci della finestra o Ctrl+C"
 
-#: app/main.py:254
+#: app/main.py:261
 msgid "Kilépés: az ablak Kilépés gombjával, a tálcaikon menüjéből vagy Ctrl+C"
 msgstr "Uscita: pulsante Esci della finestra, menu dell'icona nell'area di notifica o Ctrl+C"
 
@@ -1877,7 +1895,7 @@ msgstr ""
 "Abbiamo controllato cosa c'è nel computer. La prova lo mette anche alla prova: trascrive un campione di mezzo minuto e, se c'è\n"
 "  un server di modelli locale, riassume con esso un breve testo."
 
-#: local.py:111
+#: local.py:115
 #, python-brace-format
 msgid "Megszakadt a kapcsolat a Whisper-workerrel ({exc}); később újrapróbálom (a kész átírási lépés megmarad a workeren)."
 msgstr "La connessione al worker Whisper si è interrotta ({exc}); riproverò più tardi (il passaggio di trascrizione completato resta sul worker)."
@@ -2276,8 +2294,8 @@ msgstr "Il tuo computer"
 msgid "Skipwise"
 msgstr "Skipwise"
 
-#: app/main.py:237 app/main.py:315 app/templates/base.html:6
-#: app/templates/telepites_1.html:8 app/tray.py:119
+#: app/main.py:237 app/main.py:322 app/templates/base.html:6
+#: app/templates/telepites_1.html:8 app/tray.py:139
 msgid "Skipwise futtató"
 msgstr "Runner Skipwise"
 
@@ -2296,23 +2314,23 @@ msgstr "Runner Skipwise {__version__}, impostazioni: {path}"
 msgid "Skipwise futtató {__version__}: munkát kérek innen: {server} (leállítás: Ctrl+C)"
 msgstr "Runner Skipwise {__version__}: chiedo lavoro a {server} (stop: Ctrl+C)"
 
-#: app/tray.py:93 app/tray.py:108
+#: app/tray.py:107 app/tray.py:125
 msgid "Skipwise futtató – "
 msgstr "Runner Skipwise – "
 
-#: app/tray.py:29
+#: app/tray.py:30
 msgid "Skipwise futtató – leállt: "
 msgstr "Runner Skipwise – fermo: "
 
-#: app/tray.py:33
+#: app/tray.py:34
 msgid "Skipwise futtató – modellcsere: most ne használd a helyi modelleket"
 msgstr "Runner Skipwise – cambio modello: non usare ora i modelli locali"
 
-#: app/tray.py:31
+#: app/tray.py:32
 msgid "Skipwise futtató – nem fut"
 msgstr "Runner Skipwise – non in esecuzione"
 
-#: app/tray.py:27
+#: app/tray.py:28
 msgid "Skipwise futtató – nincs párosítva"
 msgstr "Runner Skipwise – non abbinato"
 
@@ -2320,11 +2338,11 @@ msgstr "Runner Skipwise – non abbinato"
 msgid "Skipwise futtató – telepítés"
 msgstr "Runner Skipwise – configurazione"
 
-#: app/tray.py:39
+#: app/tray.py:40
 msgid "Skipwise futtató – vár a következő munkára"
 msgstr "Runner Skipwise – in attesa del prossimo lavoro"
 
-#: app/tray.py:38
+#: app/tray.py:39
 #, python-brace-format
 msgid "Skipwise futtató – {label}"
 msgstr "Runner Skipwise – {label}"
@@ -2504,7 +2522,7 @@ msgstr "consigliamo la modalità **Misto**: la trascrizione si fa qui gratis, il
 msgid "a GPU-gép végzi"
 msgstr "lo fa la macchina GPU"
 
-#: activity.py:48
+#: activity.py:49
 msgid "a GPU-gépen"
 msgstr "sulla macchina GPU"
 
@@ -2698,7 +2716,7 @@ msgstr "rilevatore di attività vocale (VAD)"
 msgid "beszélő-szétválasztó modellek"
 msgstr "modelli di separazione degli interlocutori"
 
-#: activity.py:19
+#: activity.py:20
 msgid "beszélők szétválasztása"
 msgstr "separazione degli interlocutori"
 
@@ -2770,6 +2788,10 @@ msgstr "ci sta anche un modello grande (circa 30B); il testo ungherese si avvici
 msgid "ehhez legalább {LARGE_LLM_VRAM_GB} GB videómemória kellene"
 msgstr "servirebbero almeno {LARGE_LLM_VRAM_GB} GB di memoria video"
 
+#: activity.py:24
+msgid "emlékeztető írása"
+msgstr "scrittura del verbale"
+
 #: cli.py:207
 #, python-brace-format
 msgid "engedélyezett tartományok: {join}"
@@ -2792,7 +2814,7 @@ msgstr "questa chiave non si può eliminare da Skipwise"
 msgid "ez a kulcs a Skipwise-ból nem állítható"
 msgstr "questa chiave non si può impostare da Skipwise"
 
-#: activity.py:48 activity.py:51 app/templates/mukodes.html:39
+#: activity.py:49 activity.py:52 app/templates/mukodes.html:39
 #: app/templates/telepites_3.html:30
 msgid "ezen a gépen"
 msgstr "su questo computer"
@@ -2814,11 +2836,11 @@ msgstr "su questo computer ({title})"
 msgid "ezen a gépen nagyon lassú lenne; az átírás felhőben ajánlott"
 msgstr "sarebbe molto lenta su questo computer; si consiglia la trascrizione nel cloud"
 
-#: activity.py:23
+#: activity.py:24
 msgid "fejezetek írása"
 msgstr "scrittura dei capitoli"
 
-#: activity.py:46 activity.py:51 settings.py:147
+#: activity.py:47 activity.py:52 settings.py:147
 msgid "felhőben"
 msgstr "nel cloud"
 
@@ -2843,11 +2865,11 @@ msgstr "nel cloud · i pallini mostrano dove vanno i dati"
 msgid "felirat"
 msgstr "traccia dei sottotitoli"
 
-#: activity.py:17
+#: activity.py:18
 msgid "felirat letöltése"
 msgstr "download dei sottotitoli"
 
-#: activity.py:18
+#: activity.py:19
 msgid "feltöltés a felhőbe"
 msgstr "caricamento nel cloud"
 
@@ -2855,7 +2877,7 @@ msgstr "caricamento nel cloud"
 msgid "felvétel"
 msgstr "registrazione"
 
-#: activity.py:22
+#: activity.py:23
 msgid "felvétel keresése az oldalon"
 msgstr "ricerca della registrazione nella pagina"
 
@@ -2876,7 +2898,7 @@ msgstr "a pagamento, con le tue chiavi · si prova con una registrazione Assembl
 msgid "fizetős, a te kulcsoddal"
 msgstr "a pagamento, con la tua chiave"
 
-#: activity.py:21 app/templates/allapot.html:54
+#: activity.py:22 app/templates/allapot.html:54
 msgid "fordítás"
 msgstr "traduzione"
 
@@ -2911,7 +2933,7 @@ msgstr "su computer o telefono"
 msgid "ha épp te használsz egy modellt, legfeljebb %(polite_wait_min)s percet várok, mielőtt kiveszem a memóriából"
 msgstr "se stai usando un modello proprio allora, aspetto al massimo %(polite_wait_min)s minuti prima di toglierlo dalla memoria"
 
-#: activity.py:18
+#: activity.py:19
 msgid "hang előkészítése"
 msgstr "preparazione dell'audio"
 
@@ -2962,7 +2984,7 @@ msgstr "numero di versione non valido nell'elenco"
 msgid "https://skipwise.app"
 msgstr "https://skipwise.app"
 
-#: activity.py:17
+#: activity.py:18
 msgid "indul"
 msgstr "in avvio"
 
@@ -3012,7 +3034,7 @@ msgstr ""
 "      di trascrizione. La trascrizione nel cloud avviene solo se la chiedi in Skipwise. Conserviamo la chiave nell'archivio protetto\n"
 "      del computer; Skipwise non la vede mai."
 
-#: activity.py:22
+#: activity.py:23
 msgid "kategória választása"
 msgstr "scelta della categoria"
 
@@ -3149,7 +3171,7 @@ msgstr "scaricare i sottotitoli"
 msgid "letölteni a hangot"
 msgstr "scaricare l'audio"
 
-#: activity.py:17
+#: activity.py:18
 msgid "letöltés"
 msgstr "download"
 
@@ -3166,8 +3188,8 @@ msgstr "llm {action}: indica il nome del modello"
 msgid "megnyitás a Skipwise-ban"
 msgstr "apri in Skipwise"
 
-#: cloud.py:125 cloud.py:142 gpuswap.py:62 llm.py:89 llm.py:211 local.py:83
-#: local.py:139 whispercpp.py:298 worker.py:142
+#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
+#: local.py:143 whispercpp.py:298 worker.py:142
 msgid "megszakítva"
 msgstr "annullato"
 
@@ -3180,11 +3202,11 @@ msgstr "sì"
 msgid "megvan (%(server)s)"
 msgstr "sì (%(server)s)"
 
-#: activity.py:21
+#: activity.py:22
 msgid "mentés"
 msgstr "salvataggio"
 
-#: activity.py:20
+#: activity.py:21
 msgid "modell letöltése (első használat)"
 msgstr "download del modello (primo uso)"
 
@@ -3454,11 +3476,11 @@ msgstr "controllo …"
 msgid "vizsgálva %(scanned)s"
 msgstr "controllato %(scanned)s"
 
-#: activity.py:21
+#: activity.py:22
 msgid "válasz írása"
 msgstr "scrittura della risposta"
 
-#: activity.py:19
+#: activity.py:20
 msgid "vár a videókártyára"
 msgstr "in attesa della scheda video"
 
@@ -3686,7 +3708,7 @@ msgstr "Vuoto: l'indirizzo abituale su questo computer."
 msgid "Üresen az alapértelmezett."
 msgstr "Vuoto: il predefinito."
 
-#: activity.py:18 app/templates/allapot.html:54
+#: activity.py:19 app/templates/allapot.html:54
 msgid "átírás"
 msgstr "trascrizione"
 
@@ -3706,7 +3728,7 @@ msgstr "trascrizione e riassunto su questo computer"
 msgid "összefoglaló"
 msgstr "riassunto"
 
-#: activity.py:20
+#: activity.py:21
 msgid "összefoglaló írása"
 msgstr "scrittura del riassunto"
 

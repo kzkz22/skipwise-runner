@@ -8,15 +8,15 @@ import tempfile
 from typing import Any, Callable
 from urllib.parse import urlsplit
 
-from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, local, localllm, media, modelinfo,
-               resolve, summarize, tracks, translate, watch)
+from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, local, localllm, media, minutes,
+               modelinfo, resolve, summarize, tracks, translate, watch)
 from .config import Config
 from .errors import WorkError
 from .llm import Llm
 from .protocol import Central, CentralError
 from .i18n import gettext as _
 
-KINDS = ("transcribe", "summarize", "translate", "ask", "categorize", "chapters")
+KINDS = ("transcribe", "summarize", "translate", "ask", "categorize", "chapters", "minutes")
 
 
 def capabilities(cfg: Config) -> dict[str, Any]:
@@ -25,7 +25,7 @@ def capabilities(cfg: Config) -> dict[str, Any]:
     modes = ["captions"] + (["cloud"] if cfg.assemblyai_key else []) + (["local"] if local_whisper else [])
     roles = [r for r, model in (("public", cfg.llm_public_model), ("private", cfg.llm_private_model))
              if cfg.llm_url and model]
-    kinds = ["transcribe"] + (["summarize", "translate", "ask", "categorize", "chapters"] if roles else [])
+    kinds = ["transcribe"] + (["summarize", "translate", "ask", "categorize", "chapters", "minutes"] if roles else [])
     info, server = modelinfo.cached(cfg) if roles else ({}, "")
     defaults = {"summarize": model_for(cfg, "summarize", "public"), "translate": model_for(cfg, "translate", "public"),
                 "ask": model_for(cfg, "ask", "public"), "private": cfg.llm_private_model}
@@ -205,7 +205,7 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
             video["title"] = video.get("title") or page.title
             video["channel"] = video.get("channel") or page.site
         return result
-    if kind in ("summarize", "translate", "ask", "categorize", "chapters"):
+    if kind in ("summarize", "translate", "ask", "categorize", "chapters", "minutes"):
         cfg = localllm.effective(cfg)
         role = data.get("role")
         model = model_for(cfg, kind, role)
@@ -234,6 +234,8 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
             return result
         if kind == "chapters":
             return chapters.run(data, llm, model, stage, progress=progress, context_tokens=context)
+        if kind == "minutes":  # plan 19c round A
+            return minutes.run(data, llm, model, stage, progress=progress, context_tokens=context)
         if kind == "categorize":
             return categorize.run(data, llm, model, stage, progress=progress)
         if kind == "ask":
