@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-29 20:30+0100\n"
+"POT-Creation-Date: 2026-11-04 09:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -129,7 +129,7 @@ msgstr "(una richiesta per chiave)"
 msgid "(legfeljebb 1 perc)"
 msgstr "(al massimo 1 minuto)"
 
-#: settings.py:222 settings.py:249
+#: settings.py:231 settings.py:258
 msgid "(üres)"
 msgstr "(vuoto)"
 
@@ -352,12 +352,12 @@ msgstr "Nel pacchetto del modello di separazione degli interlocutori manca model
 msgid "A beszélők szétválasztásához hiányzik a sherpa-onnx. Telepítsd a futtatót a helyi kiegészítővel: uv tool install --force --python 3.13 \"dwyt-runner[local] @ https://github.com/kzkz22/skipwise-runner/archive/refs/heads/main.zip\""
 msgstr "Per separare gli interlocutori manca sherpa-onnx. Installa il runner con l'estensione locale: uv tool install --force --python 3.13 \"dwyt-runner[local] @ https://github.com/kzkz22/skipwise-runner/archive/refs/heads/main.zip\""
 
-#: protocol.py:160
+#: protocol.py:172
 #, python-brace-format
 msgid "A beállítás eredménye: HTTP {status_code}: {_message}"
 msgstr "Esito dell'impostazione: HTTP {status_code}: {_message}"
 
-#: protocol.py:153
+#: protocol.py:165
 #, python-brace-format
 msgid "A beállítás-változások lekérése: HTTP {status_code}: {_message}"
 msgstr "Recupero delle modifiche alle impostazioni: HTTP {status_code}: {_message}"
@@ -366,7 +366,7 @@ msgstr "Recupero delle modifiche alle impostazioni: HTTP {status_code}: {_messag
 msgid "A beállítások a Skipwise Futtatók oldaláról, a Beállítás gombbal is módosíthatók; a kulcsokat a böngésző a futtató saját kulcsával titkosítja. Minden változás naplóba kerül. Automatikusan: szerveren be, az asztali alkalmazásban ki."
 msgstr "Le impostazioni si possono cambiare anche dalla pagina Runner di Skipwise con il pulsante Impostazioni; il browser cifra le chiavi con la chiave propria del runner. Ogni modifica viene registrata. Automatico: attivo sui server, disattivo nell'app desktop."
 
-#: protocol.py:146
+#: protocol.py:158
 #, python-brace-format
 msgid "A beállítások jelentése: HTTP {status_code}: {_message}"
 msgstr "Invio delle impostazioni: HTTP {status_code}: {_message}"
@@ -383,6 +383,15 @@ msgstr "Impostazioni eliminate."
 msgid "A böngészőből feltöltött saját felvételt a futtató az Eredetik mappában megtartja, így újraíráshoz nem kell újra feltölteni. A Skipwise-ban az elem oldalán vagy a Beállításokban törölhető."
 msgstr "Le registrazioni proprie caricate dal browser restano nella cartella Originali del runner, così una nuova trascrizione non richiede un nuovo caricamento. In Skipwise si possono eliminare dalla pagina dell'elemento o dalle Impostazioni."
 
+#: work.py:208 work.py:320
+#, python-brace-format
+msgid "A diák feldolgozása nem sikerült: {exc}"
+msgstr "Elaborazione delle slide non riuscita: {exc}"
+
+#: slides.py:346
+msgid "A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek szövegét csak a látó modell olvassa, ha van."
+msgstr "Su questo computer non c'è Tesseract per il testo delle slide (tesseract_cmd); il testo delle immagini lo legge solo il modello visivo, se presente."
+
 #: captions.py:117 tracks.py:242
 msgid "A felirat üres."
 msgstr "I sottotitoli sono vuoti."
@@ -391,10 +400,14 @@ msgstr "I sottotitoli sono vuoti."
 msgid "A feliratfájl nem olvasható."
 msgstr "Il file dei sottotitoli non è leggibile."
 
-#: work.py:203
+#: work.py:292
 #, python-brace-format
 msgid "A felvétel a(z) {urlsplit} oldalon van, ami nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr "La registrazione si trova su {urlsplit}, che non è tra i domini consentiti (allowed_domains)."
+
+#: slides.py:331
+msgid "A felvételben nincs videókép, így diák sem; az átírás a diák nélkül készült."
+msgstr "La registrazione non ha immagine video, quindi nemmeno slide; la trascrizione è stata fatta senza."
 
 #: app/templates/mukodes.html:27
 #, python-format
@@ -491,25 +504,25 @@ msgstr "Lingua del runner"
 msgid "A futtató változata"
 msgstr "Versione del runner"
 
-#: protocol.py:199
+#: protocol.py:211
 #, python-brace-format
 msgid "A fájl letöltése megszakadt: {exc}"
 msgstr "Il download del file si è interrotto: {exc}"
 
-#: protocol.py:184
+#: protocol.py:196
 #, python-brace-format
 msgid "A fájl letöltése: HTTP {status_code}"
 msgstr "Download del file: HTTP {status_code}"
 
-#: work.py:127
+#: work.py:191
 msgid "A fájl már nincs meg ezen a gépen (a figyelt mappából vagy az Eredetik közül áthelyezték vagy törölték)."
 msgstr "Il file non è più su questo computer (è stato spostato o eliminato dalla cartella monitorata o dagli Originali)."
 
-#: protocol.py:193
+#: protocol.py:205
 msgid "A fájl nagyobb, mint amennyit ez a futtató elfogad (max_file_mb)."
 msgstr "Il file è più grande di quanto accetti questo runner (max_file_mb)."
 
-#: media.py:128
+#: media.py:144
 msgid "A fájl tartalma nem egyezik a beküldöttel (megváltozott vagy sérült)."
 msgstr "Il contenuto del file non corrisponde a quello inviato (modificato o danneggiato)."
 
@@ -568,7 +581,7 @@ msgstr ""
 msgid "A keresés nem sikerült: %(error)s"
 msgstr "Il controllo non è riuscito: %(error)s"
 
-#: settings.py:164
+#: settings.py:173
 msgid "A kulcsok helye"
 msgstr "Dove sono conservate le chiavi"
 
@@ -589,6 +602,14 @@ msgstr "Chiavi eliminate dall'archivio chiavi di sistema."
 msgid "A kulcsot a gép saját, védett kulcstárolójában őrizzük. A Skipwise sosem látja."
 msgstr "Conserviamo la chiave nell'archivio protetto del computer. Skipwise non la vede mai."
 
+#: slides.py:381
+msgid "A képeket a központ nem fogadta el (tárhely vagy régebbi verzió); a diák szövege megmaradt."
+msgstr "Il servizio centrale non ha accettato le immagini (spazio o versione precedente); il testo delle slide è stato conservato."
+
+#: settings.py:162
+msgid "A képeket a látó modell is leírja (cím, szöveg, szakszavak). Saját felvételnél csak a helyi modell."
+msgstr "Il modello visivo descrive anche le immagini (titolo, testo, termini). Per le registrazioni proprie solo il modello locale."
+
 #: cli.py:78
 msgid "A kód lejárt; indítsd újra a párosítást."
 msgstr "Il codice è scaduto; avvia di nuovo l'abbinamento."
@@ -607,7 +628,7 @@ msgstr "Il servizio centrale ha restituito un errore (HTTP {status_code})."
 msgid "A központ nem fogadja el a tokent ({exc}). Párosítsd újra: skipwise-runner pair {server}"
 msgstr "Il servizio centrale non accetta il token ({exc}). Abbina di nuovo: skipwise-runner pair {server}"
 
-#: protocol.py:53 protocol.py:108
+#: protocol.py:53 protocol.py:108 protocol.py:122
 #, python-brace-format
 msgid "A központ nem érhető el ({server}): {exc}"
 msgstr "Il servizio centrale non è raggiungibile ({server}): {exc}"
@@ -653,6 +674,11 @@ msgstr ""
 #, python-brace-format
 msgid "A letöltött modelleket töröltem ({d})."
 msgstr "I modelli scaricati sono stati eliminati ({d})."
+
+#: slides.py:369
+#, python-brace-format
+msgid "A látó modell egy képnél hibát adott: {exc}"
+msgstr "Il modello visivo ha dato un errore su un'immagine: {exc}"
 
 #: app/templates/gepem.html:66
 msgid "A magától frissítés ki van kapcsolva (Működés lap)."
@@ -730,6 +756,10 @@ msgstr "Passaggi di configurazione"
 msgid "A universal-3-5-pro nem támogatja ezt a nyelvet: {lang}. Válaszd az auto-t."
 msgstr "universal-3-5-pro non supporta questa lingua: {lang}. Scegli auto."
 
+#: settings.py:158
+msgid "A videó képeinek szövegét a Tesseract olvassa ki, ha telepítve van."
+msgstr "Tesseract legge il testo delle immagini del video, se è installato."
+
 #: media.py:49
 #, python-brace-format
 msgid "A videó {int} perces, hosszabb a beállított {max_duration_min} percnél (max_duration_min)."
@@ -800,6 +830,10 @@ msgstr "Aggiorna yt-dlp automaticamente"
 msgid "A yt-dlp nem hozott létre hangfájlt."
 msgstr "yt-dlp non ha creato un file audio."
 
+#: media.py:79
+msgid "A yt-dlp nem hozott létre videófájlt."
+msgstr "yt-dlp non ha creato un file video."
+
 #: errors.py:53
 #, python-brace-format
 msgid "A yt-dlp nem tudta {what}: {text}"
@@ -865,7 +899,7 @@ msgstr "{title} non è raggiungibile ({url})."
 msgid "A(z) {title} nincs telepítve ezen a gépen (local_llm = {local_llm})."
 msgstr "{title} non è installato su questo computer (local_llm = {local_llm})."
 
-#: work.py:190
+#: work.py:279
 #, python-brace-format
 msgid "A(z) {urlsplit} oldal nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr "Il sito {urlsplit} non è tra i domini consentiti (allowed_domains)."
@@ -911,7 +945,7 @@ msgstr "Dove il runner chiede lavoro. Viene compilato dall'abbinamento."
 msgid "Akkor is a helyi modellszerver dolgozik, ha felhős cím is meg van adva (a Saját gép mód ezt állítja)."
 msgstr "Lavora il server di modelli locale anche se è indicato un indirizzo cloud (la modalità Il tuo computer imposta questo)."
 
-#: settings.py:164
+#: settings.py:173
 msgid "Alapból a rendszer kulcstárolója, ha van."
 msgstr "Di default l'archivio chiavi di sistema, se c'è."
 
@@ -1090,12 +1124,12 @@ msgstr "Per il ripristino, spunta che hai capito cosa verrà eliminato."
 msgid "Az asztali alkalmazás a saját gépén frissül."
 msgstr "L'app desktop si aggiorna sul proprio computer."
 
-#: protocol.py:128
+#: protocol.py:140
 #, python-brace-format
 msgid "Az eredményt a központ nem fogadta el (HTTP {status_code}): {_message}"
 msgstr "Il servizio centrale non ha accettato il risultato (HTTP {status_code}): {_message}"
 
-#: media.py:78 tracks.py:195 tracks.py:235 whispercpp.py:265
+#: media.py:94 tracks.py:195 tracks.py:235 whispercpp.py:265
 #, python-brace-format
 msgid "Az ffmpeg nem indult el vagy nem végzett: {exc}"
 msgstr "ffmpeg non si è avviato o non ha terminato: {exc}"
@@ -1105,7 +1139,7 @@ msgstr "ffmpeg non si è avviato o non ha terminato: {exc}"
 msgid "Az ffmpeg nem tudta beolvasni a fájlt: {exc}"
 msgstr "ffmpeg non è riuscito a leggere il file: {exc}"
 
-#: media.py:75 whispercpp.py:262
+#: media.py:91 whispercpp.py:262
 msgid "Az ffmpeg nem tudta kinyerni a hangot: "
 msgstr "ffmpeg non è riuscito a estrarre l'audio: "
 
@@ -1136,7 +1170,7 @@ msgstr "La pagina non è raggiungibile (HTTP {status_code})."
 msgid "Az oldal nem érhető el ({exc}); később újrapróbálom."
 msgstr "La pagina non è raggiungibile ({exc}); riproverò più tardi."
 
-#: work.py:223
+#: work.py:331
 #, python-brace-format
 msgid "Az oldalon ezt találtam: {label}, {url}. {exc}"
 msgstr "Sulla pagina ho trovato questo: {label}, {url}. {exc}"
@@ -1236,6 +1270,18 @@ msgstr "Solo se hai attivato il token API in LM Studio."
 msgid "Csak ha egy oldal bejelentkezést kér (Netscape-formátumú cookies.txt)."
 msgstr "Solo se un sito chiede l'accesso (cookies.txt in formato Netscape)."
 
+#: settings.py:158
+msgid "Diák szövege (OCR)"
+msgstr "Testo delle slide (OCR)"
+
+#: settings.py:162
+msgid "Diák értelmezése látó modellel"
+msgstr "Interpretare le slide con un modello visivo"
+
+#: settings.py:166
+msgid "Diák: legfeljebb"
+msgstr "Slide: al massimo"
+
 #: app/templates/allapot.html:28
 msgid "Dolgozom – most ne használd a helyi modelleket"
 msgstr "Sto lavorando – non usare ora i modelli locali"
@@ -1288,7 +1334,7 @@ msgstr "Questo runner non ha una chiave AssemblyAI (skipwise-runner config set a
 msgid "Ennek a futtatónak nincs helyi Whispere (skipwise-runner config set whisper_url ..., vagy ezen a gépen: skipwise-runner config set whisper_builtin igen)."
 msgstr "Questo runner non ha un Whisper locale (skipwise-runner config set whisper_url ..., oppure su questo computer: skipwise-runner config set whisper_builtin igen)."
 
-#: work.py:236
+#: work.py:348
 #, python-brace-format
 msgid "Ennek a futtatónak nincs modellje ehhez ({role})."
 msgstr "Questo runner non ha un modello per questo ({role})."
@@ -1317,7 +1363,7 @@ msgstr "Questo accesso non è più valido; riapri la finestra."
 msgid "Ez a felirat képként van tárolva, szövegként nem olvasható ki. Válassz helyi vagy felhős átírást."
 msgstr "Questi sottotitoli sono salvati come immagini e non si possono leggere come testo. Scegli la trascrizione locale o nel cloud."
 
-#: work.py:195
+#: work.py:284
 #, python-brace-format
 msgid "Ez a futtató nem tud ilyen módot: {mode}."
 msgstr "Questo runner non supporta questa modalità: {mode}."
@@ -1379,11 +1425,11 @@ msgstr "Su questo computer non c'è whisper-cli. Installalo (per esempio dal pac
 msgid "Ezt a Whisper-modellt a futtató nem ismeri: {model} (whisper_models: {join})."
 msgstr "Il runner non conosce questo modello Whisper: {model} (whisper_models: {join})."
 
-#: work.py:188
+#: work.py:277
 msgid "Ezt a forrást ez a futtató nem dolgozza fel."
 msgstr "Questo runner non elabora questa fonte."
 
-#: work.py:240
+#: work.py:352
 #, python-brace-format
 msgid "Ezt a modellt a futtató nem ajánlja fel ehhez: {str} (llm_models, llm_private_models)."
 msgstr "Il runner non offre questo modello per questo: {str} (llm_models, llm_private_models)."
@@ -1620,11 +1666,11 @@ msgstr "Errore: nessun token in ingresso."
 msgid "Hiba: {exc}"
 msgstr "Errore: {exc}"
 
-#: work.py:103 work.py:179
+#: work.py:166 work.py:268
 msgid "Hibás fájlazonosító a munkában."
 msgstr "ID file non valido nel lavoro."
 
-#: work.py:107
+#: work.py:170
 msgid "Hibás letöltési cím a munkában."
 msgstr "Indirizzo di download non valido nel lavoro."
 
@@ -1654,7 +1700,7 @@ msgstr "Ingredienti"
 msgid "Hálózati hiba ({what}); később újrapróbálom: {text}"
 msgstr "Errore di rete ({what}); riproverò più tardi: {text}"
 
-#: settings.py:162
+#: settings.py:171
 msgid "Ide kerülnek az ideiglenes fájlok; üresen a rendszer ideiglenes mappája."
 msgstr "Qui vanno i file temporanei; vuoto = la cartella temporanea di sistema."
 
@@ -1696,12 +1742,12 @@ msgstr "Modello cloud sconosciuto: {requested}."
 msgid "Ismeretlen kulcs."
 msgstr "Chiave sconosciuta."
 
-#: work.py:271
+#: work.py:383
 #, python-brace-format
 msgid "Ismeretlen munkafajta: {kind}."
 msgstr "Tipo di lavoro sconosciuto: {kind}."
 
-#: settings.py:201
+#: settings.py:210
 #, python-brace-format
 msgid "Ismeretlen vagy nem kézzel állítható beállítás: {key}"
 msgstr "Impostazione sconosciuta o non modificabile a mano: {key}"
@@ -1874,11 +1920,11 @@ msgstr "LM Studio"
 msgid "LM Studio API-token"
 msgstr "Token API di LM Studio"
 
-#: settings.py:159
+#: settings.py:168
 msgid "Leghosszabb felvétel"
 msgstr "Registrazione più lunga"
 
-#: settings.py:158
+#: settings.py:167
 msgid "Legnagyobb fájl"
 msgstr "File più grande"
 
@@ -1899,7 +1945,11 @@ msgstr "Download"
 msgid "Letöltés: {name}"
 msgstr "Download: {name}"
 
-#: settings.py:158
+#: settings.py:164
+msgid "Látó modell"
+msgstr "Modello visivo"
+
+#: settings.py:167
 msgid "MB"
 msgstr "MB"
 
@@ -2024,7 +2074,7 @@ msgstr "È in corso un lavoro; l'aggiornamento si può avviare dopo (o avviene d
 msgid "Munkakérés: HTTP {status_code}: {_message}"
 msgstr "Richiesta di lavoro: HTTP {status_code}: {_message}"
 
-#: settings.py:162
+#: settings.py:171
 msgid "Munkamappa"
 msgstr "Cartella di lavoro"
 
@@ -2148,6 +2198,10 @@ msgstr "Nessun server di modelli locale impostato: skipwise-runner config set lo
 #: cli.py:116
 msgid "Nincs előző változat, amire visszaállhatnék."
 msgstr "Non c'è una versione precedente a cui tornare."
+
+#: slides.py:372
+msgid "Nincs látó modell ehhez a felvételhez (llm_vision_model, a modell leírásában vision); a diákat csak a szövegük alapján használtam."
+msgstr "Nessun modello visivo per questa registrazione (llm_vision_model, vision nella descrizione del modello); le slide sono state usate solo per il loro testo."
 
 #: app/templates/allapot.html:42
 msgid "Nincs munka; várom a következőt a Skipwise-ból."
@@ -2309,7 +2363,7 @@ msgstr ""
 "Impostazioni dettagliate → Riassunto, traduzione,\n"
 "      domande"
 
-#: work.py:139
+#: work.py:233
 #, python-brace-format
 msgid "Saját felvételhez ez a mód nem kérhető: {mode}."
 msgstr "Per una registrazione propria non si può chiedere questa modalità: {mode}."
@@ -2419,6 +2473,10 @@ msgstr "Installato: {__version__}; più recente: {version}"
 msgid "Telepítés lépései"
 msgstr "Passaggi di configurazione"
 
+#: settings.py:160
+msgid "Tesseract"
+msgstr "Tesseract"
+
 #: app/templates/telepites_1.html:22 app/templates/telepites_2.html:55
 #: app/templates/telepites_3.html:36 app/templates/telepites_4.html:157
 #: app/templates/telepites_4.html:158 app/templates/telepites_5.html:31
@@ -2518,7 +2576,7 @@ msgstr "Creato dai sottotitoli automatici di YouTube: possono esserci errori di 
 msgid "YouTube-feliratból"
 msgstr "Dai sottotitoli di YouTube"
 
-#: work.py:208
+#: work.py:297
 msgid "YouTube-feliratot csak YouTube-videóhoz lehet kérni."
 msgstr "I sottotitoli di YouTube si possono chiedere solo per un video di YouTube."
 
@@ -2554,7 +2612,7 @@ msgstr "consigliamo la modalità **Misto**: la trascrizione si fa qui gratis, il
 msgid "a GPU-gép végzi"
 msgstr "lo fa la macchina GPU"
 
-#: activity.py:51
+#: activity.py:52
 msgid "a GPU-gépen"
 msgstr "sulla macchina GPU"
 
@@ -2566,7 +2624,7 @@ msgstr "sulla macchina GPU (Whisper)"
 msgid "a Windows hitelesítőadat-kezelője"
 msgstr "Gestione credenziali di Windows"
 
-#: settings.py:165
+#: settings.py:174
 msgid "a beállítási fájl"
 msgstr "il file delle impostazioni"
 
@@ -2671,7 +2729,7 @@ msgstr "sul processore"
 msgid "a processzoron: egy 1 órás videó nagyjából 1 óra vagy több"
 msgstr "sul processore: un video di 1 ora richiede circa 1 ora o più"
 
-#: keystore.py:71 settings.py:165
+#: keystore.py:71 settings.py:174
 msgid "a rendszer kulcstárolója"
 msgstr "l'archivio chiavi di sistema"
 
@@ -2703,7 +2761,7 @@ msgstr "predefinito"
 msgid "alatt (ugyanaz a kulcs), vagy"
 msgstr "(stessa chiave), oppure"
 
-#: settings.py:59 settings.py:63 settings.py:138 settings.py:165
+#: settings.py:59 settings.py:63 settings.py:138 settings.py:174
 msgid "automatikus"
 msgstr "automatico"
 
@@ -2794,6 +2852,22 @@ msgstr "avvia solo l'icona nell'area di notifica, la finestra non si apre"
 msgid "csak megnézi, van-e újabb"
 msgstr "controlla solo se ce n'è una più recente"
 
+#: activity.py:27
+msgid "diák feltöltése"
+msgstr "caricamento slide"
+
+#: activity.py:26
+msgid "diák keresése a videóban"
+msgstr "ricerca delle slide nel video"
+
+#: activity.py:27
+msgid "diák szövegének olvasása"
+msgstr "lettura del testo delle slide"
+
+#: activity.py:27
+msgid "diák értelmezése"
+msgstr "interpretazione delle slide"
+
 #: app/templates/telepites_6.html:8
 msgid "dolgozik"
 msgstr "al lavoro"
@@ -2850,7 +2924,7 @@ msgstr "questa chiave non si può eliminare da Skipwise"
 msgid "ez a kulcs a Skipwise-ból nem állítható"
 msgstr "questa chiave non si può impostare da Skipwise"
 
-#: activity.py:51 activity.py:54 app/templates/mukodes.html:39
+#: activity.py:52 activity.py:55 app/templates/mukodes.html:39
 #: app/templates/telepites_3.html:30
 msgid "ezen a gépen"
 msgstr "su questo computer"
@@ -2876,7 +2950,7 @@ msgstr "sarebbe molto lenta su questo computer; si consiglia la trascrizione nel
 msgid "fejezetek írása"
 msgstr "scrittura dei capitoli"
 
-#: activity.py:49 activity.py:54 settings.py:147
+#: activity.py:50 activity.py:55 settings.py:147
 msgid "felhőben"
 msgstr "nel cloud"
 
@@ -2909,7 +2983,7 @@ msgstr "download dei sottotitoli"
 msgid "feltöltés a felhőbe"
 msgstr "caricamento nel cloud"
 
-#: work.py:101
+#: work.py:164
 msgid "felvétel"
 msgstr "registrazione"
 
@@ -2963,6 +3037,10 @@ msgstr "veloce"
 #: app/templates/telepites_1.html:12
 msgid "gépen vagy telefonon"
 msgstr "su computer o telefono"
+
+#: settings.py:159
+msgid "ha van Tesseract"
+msgstr "se c'è Tesseract"
 
 #: app/templates/mukodes.html:50
 #, python-format
@@ -3109,6 +3187,10 @@ msgstr "poca memoria dedicata: ci sta solo il modello di riconoscimento vocale p
 msgid "ki"
 msgstr "disattivo"
 
+#: settings.py:159
+msgid "kikapcsolva"
+msgstr "disattivato"
+
 #: remote.py:253 ytdlp_update.py:104
 #, python-brace-format
 msgid "kilépési kód {returncode}"
@@ -3121,6 +3203,10 @@ msgstr "chiave"
 #: tracks.py:119
 msgid "kényszerített"
 msgstr "forzato"
+
+#: settings.py:166
+msgid "kép"
+msgstr "immagini"
 
 #: cli.py:192
 #, python-brace-format
@@ -3207,6 +3293,10 @@ msgstr "scaricare i sottotitoli"
 msgid "letölteni a hangot"
 msgstr "scaricare l'audio"
 
+#: media.py:76
+msgid "letölteni a videót"
+msgstr "scaricare il video"
+
 #: activity.py:19
 msgid "letöltés"
 msgstr "download"
@@ -3225,7 +3315,8 @@ msgid "megnyitás a Skipwise-ban"
 msgstr "apri in Skipwise"
 
 #: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
-#: local.py:143 whispercpp.py:298 worker.py:142
+#: local.py:143 slides.py:101 slides.py:154 slides.py:343 slides.py:362
+#: whispercpp.py:298 worker.py:142
 msgid "megszakítva"
 msgstr "annullato"
 
@@ -3405,7 +3496,7 @@ msgstr ""
 msgid "otthoni gép"
 msgstr "computer di casa"
 
-#: settings.py:85 settings.py:93 settings.py:159
+#: settings.py:85 settings.py:93 settings.py:168
 msgid "perc"
 msgstr "min"
 
@@ -3571,32 +3662,32 @@ msgstr "parte {get}/{get2}"
 msgid "{installed} telepítve, de nem fut"
 msgstr "{installed} installato, ma non in esecuzione"
 
-#: settings.py:221
+#: settings.py:230
 #, python-brace-format
 msgid "{label}: ezek egyike: {values}"
 msgstr "{label}: uno di questi: {values}"
 
-#: settings.py:235
+#: settings.py:244
 #, python-brace-format
 msgid "{label}: http:// vagy https:// kezdetű cím"
 msgstr "{label}: un indirizzo che inizia con http:// o https://"
 
-#: settings.py:209
+#: settings.py:218
 #, python-brace-format
 msgid "{label}: igen vagy nem"
 msgstr "{label}: sì o no"
 
-#: settings.py:229
+#: settings.py:238
 #, python-brace-format
 msgid "{label}: ismeretlen érték: {join}"
 msgstr "{label}: valore sconosciuto: {join}"
 
-#: settings.py:214
+#: settings.py:223
 #, python-brace-format
 msgid "{label}: számot várok"
 msgstr "{label}: serve un numero"
 
-#: settings.py:216
+#: settings.py:225
 #, python-brace-format
 msgid "{label}: {min:g} és {max:g} között"
 msgstr "{label}: tra {min:g} e {max:g}"
@@ -3728,6 +3819,10 @@ msgstr "Benvenuto"
 msgid "Üdvözöl a Skipwise futtató"
 msgstr "Benvenuto nel runner Skipwise"
 
+#: settings.py:160
+msgid "Üresen a PATH-on lévő tesseract."
+msgstr "Vuoto: il tesseract nel PATH."
+
 #: settings.py:86
 msgid "Üresen a futtató maga intézi (Windowson letölti). Megadható a whisper-cli program vagy egy kicsomagolt kiadás mappája."
 msgstr "Vuoto: se ne occupa il runner (su Windows lo scarica). Si può indicare il programma whisper-cli o la cartella di una versione decompressa."
@@ -3743,6 +3838,10 @@ msgstr "Vuoto: il modello dei video pubblici; qui un modello che ragiona dà ris
 #: settings.py:98
 msgid "Üresen a szokásos cím ezen a gépen."
 msgstr "Vuoto: l'indirizzo abituale su questo computer."
+
+#: settings.py:164
+msgid "Üresen az a modell, amelyről a modell leírása szerint lát (vision)."
+msgstr "Vuoto: il modello che secondo la sua descrizione vede (vision)."
 
 #: settings.py:148
 msgid "Üresen az alapértelmezett."

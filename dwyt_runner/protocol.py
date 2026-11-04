@@ -113,6 +113,18 @@ class Central:
             return None
         return resp.json()
 
+    def frame(self, job_id: int, n: int, data: bytes) -> bool:
+        """One keyframe of the slides step (plan 19c round C); False: not taken (quota, an older central)."""
+        try:
+            resp = self.http.request("PUT", f"/runner/v1/jobs/{job_id}/frames/{n}", content=data, timeout=60,
+                                     headers={"content-type": "image/jpeg"})
+        except httpx.HTTPError as exc:
+            raise CentralError(_("A központ nem érhető el ({server}): {exc}").format(
+                server=self.server, exc=exc)) from exc
+        if resp.status_code == 401:
+            raise Unauthorized(_message(resp))
+        return resp.status_code == 200
+
     def originals(self, body: dict[str, Any]) -> bool:
         """The kept originals (plan 19c); False: an older central that does not know them."""
         resp = self._call("PUT", "/runner/v1/originals", json=body, timeout=30)

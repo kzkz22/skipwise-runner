@@ -19,6 +19,10 @@ Az első indítás lépései ugyanazok, mint Windowson: [lásd ott](windows.md#a
 - Indulás bejelentkezéskor: Működés lap → „Indítás bejelentkezéskor” (a `~/.config/autostart` mappába ír).
 - Helyek: beállítások `~/.config/dwyt-runner`, letöltött modellek `~/.local/share/dwyt-runner/models`, napló `~/.config/dwyt-runner/app.log`.
 
+## Diák a videókból (nem kötelező)
+
+A diák szövegéhez telepítsd a Tesseractot: `sudo apt install tesseract-ocr tesseract-ocr-hun` (Fedorán `sudo dnf install tesseract tesseract-langpack-hun`). Tesseract nélkül a diákat csak a látó modell olvassa, ha van.
+
 ## Frissítés és eltávolítás
 
 A futtató magától frissül (aláírt kiadásból, két munka között); az AppImage fájlt cseréli ki, és újraindul. A Gépem lapon kérheted azonnal is, vagy állhatsz vissza az előzőre.

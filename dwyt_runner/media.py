@@ -64,6 +64,22 @@ def download_audio(url: str, cfg: Config, outdir: str) -> str:
     return files[0]
 
 
+def download_video(url: str, cfg: Config, outdir: str) -> str:
+    """The picture for the slides (plan 19c round C): video only, at most 720p (the text stays readable)."""
+    import yt_dlp
+    opts = {**tools.ytdlp_options(cfg.cookies_file), "format": "bv*[height<=720]/b[height<=720]/bv*/b",
+            "outtmpl": os.path.join(outdir, "video.%(ext)s")}
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            ydl.extract_info(url, download=True)
+    except Exception as exc:
+        raise from_ytdlp(exc, _("letölteni a videót"), url) from exc
+    files = [f for f in glob.glob(os.path.join(outdir, "video.*")) if not f.endswith(".part")]
+    if not files:
+        raise WorkError(_("A yt-dlp nem hozott létre videófájlt."))
+    return files[0]
+
+
 def to_flac(src: str, workdir: str) -> str:
     """Mono 16 kHz FLAC: lossless for speech models and a fraction of a video's size."""
     dst = os.path.join(workdir, "audio.flac")

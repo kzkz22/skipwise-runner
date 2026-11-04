@@ -101,6 +101,12 @@ class Config:
     watch_language: str = ""           # empty: detect
     watch_summarize: bool = True
     max_file_mb: int = 4096
+    # slides and pictures of a video (plan 19c round C): OCR with Tesseract, descriptions by a vision model
+    slides_ocr: str = "auto"           # auto (Tesseract when installed) | off
+    tesseract_cmd: str = ""            # empty: tesseract on PATH
+    slides_vision: bool = True
+    llm_vision_model: str = ""         # empty: the role's model when its model info says vision
+    slides_max: int = 300
     # uploaded own recordings kept in the "Eredetik" folder for new transcripts (plan 19c, decision 19.32)
     keep_originals: bool = True
     originals_max_gb: int = 50

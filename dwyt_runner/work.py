@@ -9,7 +9,7 @@ from typing import Any, Callable
 from urllib.parse import urlsplit
 
 from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, knowledge, local, localllm, media,
-               minutes, modelinfo, originals, refine, resolve, summarize, tracks, translate, watch)
+               minutes, modelinfo, originals, refine, resolve, slides, summarize, tracks, translate, watch)
 from .config import Config
 from .errors import WorkError
 from .llm import Llm
@@ -42,6 +42,9 @@ def capabilities(cfg: Config) -> dict[str, Any]:
             "source_kinds": ["upload"] + (["local"] if cfg.watch_dirs or keeps else []),
             "keeps_originals": bool(cfg.keep_originals),
             "embedded_subtitles": True,  # captions mode on an own file: its embedded subtitles (19.12)
+            # the slides of a video before the transcription (plan 19c round C): what this machine can read them with
+            "slides": {"ocr": bool(slides.tesseract(cfg)),
+                       "vision": bool(cfg.slides_vision and roles)},
             # round 9: summaries, translations, chapters and answers in these languages (older runners: Hungarian)
             "content_languages": sorted(langs.TABLE) if roles else []}
 
@@ -93,6 +96,66 @@ def domain_allowed(url: str, allowed: list[str]) -> bool:
     return any(d == "*" or host == d.lower() or host.endswith("." + d.lower()) for d in allowed)
 
 
+class _Prefetched(media.Fetch):
+    """A URL whose audio is downloaded in a thread while the slides are looked at (plan 19c round C)."""
+
+    def __init__(self, inner: media.Fetch, workdir: str) -> None:
+        import threading
+        self.inner, self.path, self.error = inner, None, None
+
+        def fetch() -> None:
+            try:
+                self.inner.info()
+                self.path = self.inner.get(workdir)
+            except BaseException as exc:  # noqa: BLE001 - handed over to the transcription
+                self.error = exc
+        self.thread = threading.Thread(target=fetch, name="audio-download", daemon=True)
+        self.thread.start()
+
+    def info(self) -> dict[str, Any]:
+        self.thread.join()
+        if self.error is not None:
+            raise self.error
+        return self.inner.info()
+
+    def get(self, workdir: str) -> str:
+        self.thread.join()
+        if self.error is not None:
+            raise self.error
+        return self.path
+
+
+def _uploader(central: Central | None, job: dict[str, Any]) -> Callable[[slides.Frame], bool] | None:
+    if central is None or not job.get("job_id"):
+        return None
+
+    def upload(frame: slides.Frame) -> bool:
+        with open(frame.path, "rb") as fh:
+            return central.frame(int(job["job_id"]), frame.n, fh.read())
+    return upload
+
+
+def _slides_step(video: str, options: dict[str, Any], cfg: Config, workdir: str, role: str,
+                 stage: Callable[[str], None], cancelled: Callable[[], bool], central: Central | None,
+                 job: dict[str, Any], progress: Callable[[dict[str, Any]], None]
+                 ) -> tuple[dict[str, Any], slides.Outcome]:
+    """The slides before the transcription: their terms go to Whisper / AssemblyAI with the user's (19c round C)."""
+    outcome = slides.run(video, options, cfg, os.path.join(workdir, "frames"), role, stage, cancelled,
+                         _uploader(central, job), progress)
+    if outcome.terms and options.get("mode") in ("local", "cloud"):
+        options = {**options, "terms": outcome.terms}
+    return options, outcome
+
+
+def _with_slides(result: dict[str, Any], outcome: slides.Outcome | None) -> dict[str, Any]:
+    if outcome is None:
+        return result
+    result.update(slides.result_fields(outcome))
+    tr = result.setdefault("transcript", {})
+    tr["warnings"] = [*outcome.warnings, *(tr.get("warnings") or [])][:20]
+    return result
+
+
 def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Callable[[str], None],
               cancelled: Callable[[], bool], central: Central | None) -> dict[str, Any]:
     """An own recording: uploaded to the central service, or a file of this runner's watched folder."""
@@ -129,6 +192,36 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
                                   "áthelyezték vagy törölték)."))
             return path
     fetch = media.from_file(name, sha, obtain, options)
+    outcome = None
+    shots = None
+    if options.get("slides"):  # the slides first, on the file itself (plan 19c round C)
+        shots = tempfile.mkdtemp(prefix="dwyt_slides_", dir=cfg.work_dir or None)
+        stage("download")
+        path = fetch.verified(shots)
+        os.makedirs(os.path.join(shots, "frames"), exist_ok=True)
+        try:
+            options, outcome = _slides_step(path, options, cfg, shots, "private", stage, cancelled, central, job,
+                                            lambda p: None)
+        except WorkError as exc:  # the slides are extra: the transcription still runs
+            if cancelled() or exc.retry == "later":
+                raise
+            outcome = slides.Outcome(warnings=[_("A diák feldolgozása nem sikerült: {exc}").format(exc=exc)])
+        fetch = media.from_file(name, sha, lambda workdir: path, options)  # no second download
+    try:
+        result = _transcribe_own(fetch, options, cfg, stage, cancelled)
+    finally:
+        if shots:
+            shutil.rmtree(shots, ignore_errors=True)
+    report = fetch.report()
+    if report is not None:
+        result["tracks"] = report
+    if reports and central is not None:  # a newly kept original: the central shows it on the item page
+        originals.send(cfg, central, reports[-1])
+    return _with_slides(result, outcome)
+
+
+def _transcribe_own(fetch: media.from_file, options: dict[str, Any], cfg: Config, stage: Callable[[str], None],
+                    cancelled: Callable[[], bool]) -> dict[str, Any]:
     mode = options.get("mode")
     if mode == "local":
         result = local.run(fetch, options, cfg, stage, cancelled)
@@ -138,11 +231,6 @@ def _own_file(job: dict[str, Any], data: dict[str, Any], cfg: Config, stage: Cal
         result = _embedded_subtitles(fetch, options, cfg, stage)
     else:
         raise WorkError(_("Saját felvételhez ez a mód nem kérhető: {mode}.").format(mode=mode))
-    report = fetch.report()
-    if report is not None:
-        result["tracks"] = report
-    if reports and central is not None:  # a newly kept original: the central shows it on the item page
-        originals.send(cfg, central, reports[-1])
     return result
 
 
@@ -207,22 +295,45 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
             url = chosen.url
         elif mode == "captions" and source.get("kind") != "youtube":
             raise WorkError(_("YouTube-feliratot csak YouTube-videóhoz lehet kérni."))
+        outcome, shots = None, None
         try:
             if mode != "captions":
                 # Indavideo: yt-dlp's tokens are refused; ask the way the player does (indavideo.py)
                 url = indavideo.direct(url) or url
+            source_of: media.Fetch | str = url
+            if options.get("slides"):  # the slides first (plan 19c round C); the audio comes meanwhile
+                shots = tempfile.mkdtemp(prefix="dwyt_slides_", dir=cfg.work_dir or None)
+                os.makedirs(os.path.join(shots, "audio"))
+                os.makedirs(os.path.join(shots, "frames"))
+                stage("download")
+                inner = media.from_url(url, cfg)
+                inner.info()  # refuses playlists, live streams, too long videos before any download
+                if mode != "captions":
+                    source_of = _Prefetched(inner, os.path.join(shots, "audio"))
+                try:
+                    video = media.download_video(url, cfg, shots)
+                    options, outcome = _slides_step(video, options, cfg, shots, "public", stage, cancelled, central,
+                                                    job, progress)
+                except WorkError as exc:  # the slides are extra: the transcription still runs
+                    if cancelled() or exc.retry == "later":
+                        raise
+                    outcome = slides.Outcome(warnings=[_("A diák feldolgozása nem sikerült: {exc}").format(exc=exc)])
             if mode == "captions":
                 result = captions.run(url, options, cfg, stage)
             elif mode == "cloud":
-                result = cloud.run(url, options, cfg, stage, cancelled)
+                result = cloud.run(source_of, options, cfg, stage, cancelled)
             else:
-                result = local.run(url, options, cfg, stage, cancelled)
+                result = local.run(source_of, options, cfg, stage, cancelled)
         except WorkError as exc:
             if page is None:
                 raise
             # say what was found on the page, so a failure shows that the resolver did its part
             raise WorkError(_("Az oldalon ezt találtam: {label}, {url}. {exc}").format(
                 label=chosen.label, url=chosen.url, exc=exc), exc.retry) from exc
+        finally:
+            if shots:
+                shutil.rmtree(shots, ignore_errors=True)
+        result = _with_slides(result, outcome)
         if page is not None:
             result["page"] = page.summary(chosen)
             video = result.setdefault("video", {})

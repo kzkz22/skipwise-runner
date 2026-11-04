@@ -19,6 +19,10 @@ Mit csinál a parancs pontosan: a `/futtato.sh` címen olvasható, érdemes elol
 
 A futtató kártyáján a **Beállítás** gomb: működési mód, modellek, LLM-cím, figyelt mappák stb. A kulcsokat (AssemblyAI, LLM) a böngésződ a futtató saját kulcsával titkosítja, így a Skipwise nem látja őket, és visszaolvasni sem lehet. A változást a futtató pár másodpercen belül átveszi, ellenőrzi, és visszajelez; minden változás a napló részbe kerül, és értesítés megy róla. A szerver saját útvonalai (whisper.cpp helye, sütifájl, munkamappa) csak a szerveren állíthatók: `skipwise-runner config set …`; rendszergazdaként telepítve a futtató felhasználójával: `runuser -u dwyt-runner -- env HOME=/var/lib/dwyt-runner /var/lib/dwyt-runner/.local/bin/dwyt-runner config set …`.
 
+## Diák a videókból (nem kötelező)
+
+A diák szövegéhez: `sudo apt install tesseract-ocr tesseract-ocr-hun`, utána indítsd újra a futtatót (`sudo systemctl restart dwyt-runner`).
+
 ## Frissítés
 
 Ha van újabb változat, a Skipwise Futtatók oldalán a kártyán megjelenik a **Frissítés most** gomb: a futtató két munka között telepíti az aláírt kiadást, és újraindul. A szerveren kézzel: `skipwise-runner update` (`--check`: csak megnézi, `--back`: vissza az előzőre; rendszergazdaként telepítve a fenti `runuser …` előtaggal), utána `systemctl restart dwyt-runner`. Ha azt szeretnéd, hogy magától frissüljön: Beállítás → „A futtató frissítése magától” → be.

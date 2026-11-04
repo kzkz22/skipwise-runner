@@ -25,6 +25,10 @@ A futtató ablaka lépésenként végigvezet:
 - Az ablak bezárása csak elrejti: a futtató a háttérben dolgozik tovább. Kilépni a tálcaikon menüjéből vagy az ablak **Kilépés** gombjával lehet.
 - **Állapot** lap: mi fut most, mi készült el. **Működés:** mód, indulás bejelentkezéskor, részletes beállítások, és hogy a Skipwise-ból is állítható legyen-e. **Gépem:** a gép, a próbafuttatás, a yt-dlp és a futtató változata. **Kulcsok:** a kulcsok megadása és kipróbálása.
 
+## Diák a videókból (nem kötelező)
+
+Ha a videók diáinak szövegét is fel szeretnéd használni, telepítsd a Tesseractot: a [UB Mannheim kiadása](https://github.com/UB-Mannheim/tesseract/wiki) telepítőjében jelöld be a magyar nyelvet (Additional language data → Hungarian). A futtató a PATH-on és a szokásos helyen (`C:\Program Files\Tesseract-OCR`) is megkeresi; ha máshova telepítetted, add meg a Működés fülön vagy így: `skipwise-runner config set tesseract_cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"`. Tesseract nélkül a diákat csak a látó modell olvassa, ha van.
+
 ## Frissítés
 
 A futtató naponta megnézi, van-e újabb változat, és két munka között magától telepíti. Csak a Skipwise kiadói kulcsával aláírt kiadást fogadja el. A **Gépem** lapon látszik a változat; ott kérheted azonnal is („Frissítés most”), és ott állhatsz vissza az előzőre. A beállítások, kulcsok és modellek megmaradnak.

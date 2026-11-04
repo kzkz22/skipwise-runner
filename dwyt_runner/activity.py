@@ -23,7 +23,8 @@ STAGE_LABELS = labels({
     "translate": N_("fordítás"), "ask": N_("válasz írása"), "write": N_("mentés"),
     "page": N_("felvétel keresése az oldalon"), "categorize": N_("kategória választása"),
     "chapters": N_("fejezetek írása"), "minutes": N_("emlékeztető írása"), "knowledge": N_("szójegyzék gyűjtése"),
-    "refine": N_("bizonytalan szavak javítása"),
+    "refine": N_("bizonytalan szavak javítása"), "frames": N_("diák keresése a videóban"),
+    "ocr": N_("diák szövegének olvasása"), "vision": N_("diák értelmezése"), "upload-frames": N_("diák feltöltése"),
 })
 HISTORY_MAX = 200
 _lock = threading.Lock()

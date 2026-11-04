@@ -7,6 +7,7 @@ Amit végez:
 - **YouTube-felirat** letöltése (gyors, ingyenes, beszélők nélkül);
 - **felhős átírás** az AssemblyAI-jal, a **saját kulcsoddal** (a költség a tiéd);
 - **helyi átírás beszélőkkel** a saját GPU-don (Whisper; ehhez [skipwise-airouter](https://github.com/kzkz22/skipwise-airouter) és [skipwise-gpu](https://github.com/kzkz22/skipwise-gpu) kell);
+- **diák és képek** egy videóból, ha a beküldésnél kéred: a futtató megkeresi a videóban a diákat, kiolvassa a szövegüket (Tesseract), a látó modell röviden leírja őket, a szakszavaikat pedig odaadja az átírásnak. A képek a központba kerülnek, az elem oldalán a szöveg mellett látszanak;
 - **magyar összefoglaló és fordítás** bármely OpenAI-kompatibilis szerverrel: LiteLLM, OpenRouter, llama-server, Ollama, vagy próbaként az AssemblyAI LLM Gateway-jével, ugyanazzal a kulccsal, mint az átírás.
 
 A kulcsaid csak itt, a gépeden vannak; a központ soha nem látja őket. A YouTube a te IP-címedről, a te sávszélességeddel töltődik.
@@ -146,6 +147,25 @@ A tálcaikon színe mutatja, mi történik: **zöld** – vár a következő mun
 **Indítás bejelentkezéskor:** a Működés fülön egy kapcsolóval (vagy `skipwise-runner autostart on|off|status`) a futtató a gép bekapcsolása után magától elindul a tálcán, ablak nélkül. Rendszergazdai jog nem kell: Windowson a felhasználó saját indítási listájába (a Feladatkezelő *Indítási alkalmazások* lapján látszik), Linuxon a `~/.config/autostart` mappába kerül. Windowson ilyenkor a konzolablak nélküli `dwyt-runner-app` indul; a naplója a beállítások mellett, az `app.log` fájlban van.
 
 A telepítő a következő lépésben jön.
+
+## Diák és képek
+
+Ha a beküldésnél bekapcsolod a „Diák és képek feldolgozása” jelölőt (megbeszélésnél alapból be van kapcsolva), a futtató az átírás előtt végignézi a videót:
+
+1. megkeresi azokat a pillanatokat, amikor a kép megváltozik (új dia, új táblakép), és legalább percenként egy képet; a szinte egyformákat összevonja, legfeljebb `slides_max` képet tart meg (alapból 300);
+2. kiolvassa a képek szövegét a **Tesseract** programmal, ha telepítve van;
+3. a látó modell (amelyiknek a modell leírásában `vision` áll, vagy amit az `llm_vision_model` megad) röviden leírja a szöveges képeket: cím, fő szöveg, szakszavak. Saját felvételnél csak a helyi (privát) modell nézheti meg a képeket; ha az nem lát, csak a Tesseract szövege marad;
+4. a diák szakszavait (a te szavaid után, legfeljebb 60 együtt) odaadja a Whispernek, illetve az AssemblyAI-nak. Mondatokat soha, csak szavakat, hogy a dia nyelve ne vigye el a beszéd nyelvét.
+
+URL-nél a hang letöltése közben töltődik le a kép (legfeljebb 720p). Ha a felvételben nincs kép, vagy valami nem sikerül, az átírás a diák nélkül készül el, és ezt figyelmeztetés jelzi.
+
+A Tesseract telepítése:
+
+- Windows: a [UB Mannheim kiadása](https://github.com/UB-Mannheim/tesseract/wiki); a telepítőben jelöld be a magyar nyelvet (Additional language data → Hungarian). Ha nem a PATH-on van: `skipwise-runner config set tesseract_cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"`.
+- Debian, Ubuntu: `sudo apt install tesseract-ocr tesseract-ocr-hun`.
+- macOS: `brew install tesseract tesseract-lang`.
+
+Ki is kapcsolható: `skipwise-runner config set slides_ocr off`, illetve `slides_vision false`.
 
 ## Saját felvételek
 

@@ -155,6 +155,15 @@ SETTINGS: tuple[Setting, ...] = (
       "elem oldalán vagy a Beállításokban törölhető.")),
     S("originals_max_gb", "int", "sources", N_("Eredetik: legfeljebb"), N_("Fölötte a legrégebben használt eredeti "
       "törlődik."), min=1, max=100000, unit=N_("GB"), show_if=(("keep_originals", True),)),
+    S("slides_ocr", "choice", "sources", N_("Diák szövege (OCR)"), N_("A videó képeinek szövegét a Tesseract olvassa ki, "
+      "ha telepítve van."), choices=(("auto", N_("ha van Tesseract")), ("off", N_("kikapcsolva"))), advanced=True),
+    S("tesseract_cmd", "path", "sources", N_("Tesseract"), N_("Üresen a PATH-on lévő tesseract."), advanced=True,
+      remote=False),
+    S("slides_vision", "bool", "sources", N_("Diák értelmezése látó modellel"), N_("A képeket a látó modell is "
+      "leírja (cím, szöveg, szakszavak). Saját felvételnél csak a helyi modell.")),
+    S("llm_vision_model", "text", "sources", N_("Látó modell"), N_("Üresen az a modell, amelyről a modell leírása "
+      "szerint lát (vision)."), advanced=True, show_if=(("slides_vision", True),)),
+    S("slides_max", "int", "sources", N_("Diák: legfeljebb"), "", min=1, max=1000, unit=N_("kép"), advanced=True),
     S("max_file_mb", "int", "sources", N_("Legnagyobb fájl"), "", min=1, max=100000, unit=N_("MB"), advanced=True),
     S("max_duration_min", "int", "sources", N_("Leghosszabb felvétel"), "", min=1, max=1440, unit=N_("perc"),
       advanced=True),

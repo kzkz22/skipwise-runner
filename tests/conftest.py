@@ -192,6 +192,17 @@ class FakeCentral:
             fake.originals.append(await request.json())
             return {"ok": True}
 
+        @app.put("/runner/v1/jobs/{job_id}/frames/{n}")
+        async def frames(job_id: int, n: int, request: Request):  # plan 19c round C: the keyframes
+            bad = check(request)
+            if bad:
+                return bad
+            if fake.frames_refused:  # an older central or a full image quota
+                return JSONResponse({"error": "quota"}, status_code=413)
+            body = await request.body()
+            fake.frames[(job_id, n)] = (request.headers.get("content-type"), body)
+            return {"ok": True}
+
         @app.post("/runner/v1/jobs/{job_id}/fail")
         async def fail(job_id: int, request: Request):
             bad = check(request)
@@ -212,6 +223,7 @@ class FakeCentral:
         self.partials, self.no_partial, self.stop_on_partial = [], False, set()
         self.languages = None  # the Dwyt-Languages claim header (round 9)
         self.originals, self.no_originals = [], False
+        self.frames, self.frames_refused = {}, False
 
     def add_job(self, job_id: int, kind: str, data: dict) -> None:
         self.known.add(job_id)
@@ -303,6 +315,13 @@ class FakeLlm:
 
         def answer_for(body):
             system = body["messages"][0]["content"]
+            if isinstance(system, list):  # a picture for the vision model (19c round C)
+                fake.vision_calls.append(body)
+                answer = (fake.vision_answers.pop(0) if fake.vision_answers else json.dumps(
+                    {"kind": "slide", "title": "Negyedéves OKR", "text": "Célok és kulcseredmények",
+                     "terms": ["OKR", "Kubernetes"]}, ensure_ascii=False))
+                return {"model": body["model"], "choices": [{"message": {"content": answer}}],
+                        "usage": {"prompt_tokens": 300, "completion_tokens": 20}}
             if system.startswith(("Fordító vagy", "You are a translator")):
                 import re as _re
                 user = body["messages"][1]["content"]
@@ -398,6 +417,8 @@ class FakeLlm:
         self.stream, self.stall_s, self.cut, self.piece_delay = True, 0.0, False, 0.0
         self.info, self.info_calls = None, 0  # /model/info rows (LiteLLM); None = not a LiteLLM
         self.category_answers: list[str] = []
+        self.vision_calls: list[dict] = []
+        self.vision_answers: list[str] = []
         self.minutes_answers: list[str] = []
         self.knowledge_answers: list[str] = []
         self.refine_answers: list[str] = []
