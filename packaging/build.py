@@ -8,6 +8,7 @@
 Both carry their own Python (the standalone CPython uv manages) with the runner and its [desktop,local]
 extras installed into it; Linux also gets Qt for the window (pywebview[qt], decision 18.19). whisper.cpp
 is not inside: the runner downloads the official release on first use, SHA-256 checked (decision 18.18).
+The Windows package carries Tesseract for the slides (plan 19c round C); Linux uses the system's.
 The package kind is written into the bundled Python (dwyt-runner-package.json), so the runner knows how
 to update itself. Output: dist/dwyt-runner-setup-<version>.exe or dist/dwyt-runner-<version>-x86_64.AppImage.
 """
@@ -137,6 +138,74 @@ WIN_SRC = BUILD / "windows"
 ISS = ROOT / "packaging" / "windows" / "dwyt-runner.iss"
 
 
+# Tesseract OCR for the slides (plan 19c round C): UB Mannheim's Windows build (Apache-2.0; the MinGW runtime and
+# libraries keep their own licences, see tesseract/README.txt), taken out of its NSIS installer with 7-Zip: the
+# program and the DLLs it loads, debug info stripped (libtesseract: 101 MB -> 4 MB). The language data is not
+# inside: the runner fetches tessdata_fast files when needed, SHA-256 checked (slides.TESSDATA_SHA256).
+TESSERACT_URL = ("https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/"
+                 "tesseract-ocr-w64-setup-5.4.0.20240606.exe")
+TESSERACT_SHA256 = "c885fff6998e0608ba4bb8ab51436e1c6775c2bafc2559a19b423e18678b60c9"
+TESSERACT_FILES = (
+    "tesseract.exe", "libtesseract-5.dll", "libleptonica-6.dll", "libLerc.dll", "libarchive-13.dll", "libb2-1.dll",
+    "libbz2-1.dll", "libcrypto-3-x64.dll", "libdeflate.dll", "libexpat-1.dll", "libgcc_s_seh-1.dll", "libgif-7.dll",
+    "libiconv-2.dll", "libjbig-0.dll", "libjpeg-8.dll", "liblz4.dll", "liblzma-5.dll", "libopenjp2-7.dll",
+    "libpng16-16.dll", "libsharpyuv-0.dll", "libstdc++-6.dll", "libtiff-6.dll", "libwebp-7.dll", "libwebpmux-3.dll",
+    "libwinpthread-1.dll", "libzstd.dll", "zlib1.dll")
+TESSERACT_README = """Tesseract OCR {version} for the Skipwise runner's slides (Windows build by UB Mannheim).
+Source: https://github.com/tesseract-ocr/tesseract (Apache License 2.0, LICENSE in this folder)
+Windows build: https://github.com/UB-Mannheim/tesseract ({url})
+The DLLs are the MinGW-w64 builds of their projects, under their own licences (Leptonica BSD-2, libarchive BSD,
+OpenSSL Apache-2.0, libiconv LGPL-2.1, GCC runtime with the runtime library exception, the image libraries under
+their permissive licences); their sources are linked from the Windows build's page.
+Language data: tessdata_fast 4.1.0 (Apache-2.0), downloaded by the runner when a language is needed.
+"""
+
+
+def seven_zip() -> str:
+    found = shutil.which("7z")
+    for p in (found, r"C:\Program Files\7-Zip\7z.exe"):
+        if p and Path(p).is_file():
+            return p
+    raise SystemExit("7-Zip (7z) not found: needed to take Tesseract out of its installer")
+
+
+def strip_tool() -> str | None:
+    found = shutil.which("strip") or shutil.which("x86_64-w64-mingw32-strip")
+    for p in (found, r"C:\mingw64\bin\strip.exe", r"C:\msys64\mingw64\bin\strip.exe"):
+        if p and Path(p).is_file():
+            return p
+    return None
+
+
+def windows_tesseract(dest: Path) -> None:
+    import hashlib
+    work = BUILD / "tesseract-setup"
+    if work.exists():
+        shutil.rmtree(work)
+    work.mkdir(parents=True)
+    setup = work / "setup.exe"
+    with urllib.request.urlopen(TESSERACT_URL, timeout=300) as resp:
+        setup.write_bytes(resp.read())
+    if hashlib.sha256(setup.read_bytes()).hexdigest() != TESSERACT_SHA256:
+        raise SystemExit("the Tesseract installer's SHA-256 does not match")
+    run(seven_zip(), "x", "-y", f"-o{work / 'x'}", str(setup))
+    dest.mkdir(parents=True)
+    for name in TESSERACT_FILES:
+        shutil.copy2(work / "x" / name, dest / name)
+    shutil.copy2(work / "x" / "doc" / "LICENSE", dest / "LICENSE")
+    version = TESSERACT_URL.rsplit("-", 1)[-1].removesuffix(".exe")
+    (dest / "README.txt").write_text(TESSERACT_README.format(version=version, url=TESSERACT_URL), encoding="utf-8")
+    strip = strip_tool()
+    if strip:
+        for name in TESSERACT_FILES:
+            run(strip, "--strip-debug", str(dest / name))
+    else:
+        print("warning: no strip tool; Tesseract's DLLs keep their debug info (about 100 MB more)")
+    if os.name == "nt":
+        print(run(str(dest / "tesseract.exe"), "--version"))
+    shutil.rmtree(work)
+
+
 def windows_folder() -> Path:
     """Everything the installer puts down, in build/package/windows."""
     src = WIN_SRC
@@ -144,6 +213,7 @@ def windows_folder() -> Path:
         shutil.rmtree(src)
     python = bundled_python(src / "python")
     install_runner(python, "inno", [])
+    windows_tesseract(src / "tesseract")
     icons(python, src)
     (src / "bin").mkdir()
     for name in ("skipwise-runner", "dwyt-runner"):  # the command, and its name before 0.17

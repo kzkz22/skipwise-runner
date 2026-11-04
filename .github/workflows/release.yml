@@ -150,6 +150,12 @@ jobs:
           Write-Output "version: $out"
           $out = & "$app\python\python.exe" -c "import webview, pystray, sherpa_onnx, dwyt_runner.updater as u; k = u.kind(); print(k); assert k == 'inno', k" 2>&1
           if ($LASTEXITCODE -ne 0) { Fail "imports: $out" }
+          # Tesseract for the slides (19c round C): found by the runner, and it runs with its DLLs
+          $out = & "$app\python\python.exe" -c "from dwyt_runner import slides; from dwyt_runner.config import Config; t = slides.tesseract(Config()); print(t); assert t and t.endswith('tesseract\\tesseract.exe'), t" 2>&1
+          if ($LASTEXITCODE -ne 0) { Fail "Tesseract not found: $out" }
+          $out = & "$app\tesseract\tesseract.exe" --version 2>&1
+          if ($LASTEXITCODE -ne 0) { Fail "Tesseract does not run: $out" }
+          Write-Output "tesseract: $($out | Select-Object -First 1)"
           $out = & "$app\python\python.exe" -m dwyt_runner.app.main --self-test 2>&1
           if ($LASTEXITCODE -ne 0) { Fail "the window app would not start: $out" }
           Write-Output "app: $out"

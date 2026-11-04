@@ -21,7 +21,7 @@ A futtató kártyáján a **Beállítás** gomb: működési mód, modellek, LLM
 
 ## Diák a videókból (nem kötelező)
 
-A diák szövegéhez: `sudo apt install tesseract-ocr tesseract-ocr-hun`, utána indítsd újra a futtatót (`sudo systemctl restart dwyt-runner`).
+Az egysoros telepítő rendszergazdaként a Tesseractot is telepíti a rendszer csomagjából (`tesseract-ocr`); a nyelvi adatokat a futtató maga tölti le, ha hiányoznak. Régebbi telepítésnél vagy saját felhasználóként kézzel: `sudo apt install tesseract-ocr`, utána `sudo systemctl restart dwyt-runner` (a futtató indításkor nézi meg, mivel tud olvasni).
 
 ## Frissítés
 

@@ -174,39 +174,119 @@ def keyframes(path: str, duration: float, workdir: str, limit: int,
 
 # ---- text -----------------------------------------------------------------------------------------
 
+# the language data of Tesseract's fast LSTM models (tessdata_fast 4.1.0; Apache-2.0), fetched when a language is
+# missing from the installed Tesseract; pinned by SHA-256 (a parser runs on them)
+TESSDATA_URL = "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/4.1.0/{code}.traineddata"
+TESSDATA_SHA256 = {
+    "bul": "aebc9b0fcc8cfaf8a9f38a02bb7b85052bd850744696a2c11cf0081820e5b21e",
+    "ces": "934bcaf97ef3348413263331131c9fa7f55f30db333c711929c124fb635f7e1b",
+    "dan": "acb1fd074487a31d1294fcdfd7d7c673467ffd8aeacb2ccd61ebcbf04eb4e2fa",
+    "deu": "19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d",
+    "eng": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+    "fin": "61a04cd62b507c3d9ae0e1cda399e6715ebf49dea9df47897c8acdcd3bd3e13c",
+    "fra": "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca",
+    "hrv": "9e515d9832ce259dbab550b1cc6b998f8b929faf2edacaaca981b05adb130571",
+    "hun": "35067e7cfe102dcdc953f9a758fdfaa6296b17a1ee6d874ee780fa306430b9fb",
+    "ita": "b8f89e1e785118dac4d51ae042c029a64edb5c3ee42ef73027a6d412748d8827",
+    "lav": "7d9eaf22254b381f18b806cd6cb647862a397a7221adbce3e22cc421793a8847",
+    "lit": "1e383df5b055583bc01cb5764ecdf74c540753f2cb3f8205e7105361da4bc989",
+    "nld": "ced0e5e046a84c908a6aa7accbef9a232c4a5d9a8276691b81c6ee64d02963f6",
+    "pol": "c4476cdbc0e33d898d32345122b7be1cbf85ace15f920f06c7714756e1ef79b2",
+    "por": "c4932b937207a9514b7514d518b931a99938c02a28a5a5a553f8599ed58b7deb",
+    "ron": "9adfde6b51ba4b97efd10ea37c3070fd3fc2bad7815e81f5c3c198cd96216cc9",
+    "slk": "fbcc400a9c74c6a13d922fcb1211b655d1b165387b675ed75cd2dbd756b974a5",
+    "slv": "b937632c17ce5fdf20535d25feec044da10a0c4c8234f4302d5606fd671cf60d",
+    "spa": "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464",
+    "swe": "f7304988d41f833efebcc2d529df54b1903ecebbc3da1faabd19a0fddd4fe586",
+}
+
+
+def bundled_tesseract() -> str | None:
+    """The Tesseract the Windows package carries ({app}\\tesseract, next to {app}\\python)."""
+    import sys
+    path = os.path.join(os.path.dirname(sys.prefix), "tesseract", "tesseract.exe")
+    return path if os.name == "nt" and os.path.isfile(path) else None
+
+
 def tesseract(cfg: Config) -> str | None:
+    """tesseract_cmd; on Windows the one in the package first, then PATH, then where UB Mannheim's installer puts it;
+    elsewhere PATH."""
     if cfg.slides_ocr == "off":
         return None
-    cmd = cfg.tesseract_cmd or "tesseract"
-    found = cmd if os.path.isfile(cmd) else shutil.which(cmd)
-    if found or cfg.tesseract_cmd or os.name != "nt":
-        return found
-    # where the UB Mannheim installer puts it (for everyone / for this user)
+    if cfg.tesseract_cmd:
+        cmd = cfg.tesseract_cmd
+        return cmd if os.path.isfile(cmd) else shutil.which(cmd)
+    if os.name != "nt":
+        return shutil.which("tesseract")
     places = [(os.environ.get("ProgramFiles"), "Tesseract-OCR"),
               (os.environ.get("LOCALAPPDATA"), os.path.join("Programs", "Tesseract-OCR"))]
-    for base, folder in places:
-        path = os.path.join(base, folder, "tesseract.exe") if base else ""
-        if path and os.path.isfile(path):
-            return path
-    return None
+    candidates = [bundled_tesseract(), shutil.which("tesseract")]
+    candidates += [os.path.join(b, f, "tesseract.exe") if b else "" for b, f in places]
+    return next((p for p in candidates if p and os.path.isfile(p)), None)
 
 
-def ocr_langs(cmd: str, language: str | None) -> str:
+def tessdata_dir() -> str:
+    from .config import data_home
+    return os.path.join(str(data_home()), "tessdata")
+
+
+def fetch_tessdata(code: str, folder: str) -> bool:
+    """One language's data into folder (SHA-256 checked); True when it is there."""
+    import hashlib
+
+    import httpx
+    dest = os.path.join(folder, f"{code}.traineddata")
+    want = TESSDATA_SHA256.get(code)
+    if not want:
+        return False
+    if os.path.isfile(dest):
+        with open(dest, "rb") as fh:
+            if hashlib.sha256(fh.read()).hexdigest() == want:
+                return True
+    os.makedirs(folder, exist_ok=True)
+    try:
+        resp = httpx.get(TESSDATA_URL.format(code=code), timeout=120, follow_redirects=True)
+    except httpx.HTTPError:
+        return False
+    if resp.status_code != 200 or hashlib.sha256(resp.content).hexdigest() != want:
+        return False
+    tmp = dest + ".part"
+    with open(tmp, "wb") as fh:
+        fh.write(resp.content)
+    os.replace(tmp, dest)
+    return True
+
+
+def installed_langs(cmd: str) -> set[str]:
     try:
         proc = subprocess.run([cmd, "--list-langs"], capture_output=True, timeout=30, check=False,
                               **tools.no_window())
-        have = set(proc.stdout.decode("utf-8", "replace").split())
     except (OSError, subprocess.SubprocessError):
-        return "eng"
-    wanted = [TESSERACT_LANGS.get((language or "hu")[:2], "eng"), "eng"]
-    langs = [lang for lang in dict.fromkeys(wanted) if lang in have]
-    return "+".join(langs) or "eng"
+        return set()
+    out = (proc.stdout + proc.stderr).decode("utf-8", "replace").splitlines()
+    return {line.strip() for line in out if re.fullmatch(r"[a-z_]{3,}", line.strip())}
 
 
-def ocr(cmd: str, path: str, langs: str) -> str:
+def ocr_langs(cmd: str, language: str | None) -> tuple[str, str | None]:
+    """(the -l value, a --tessdata-dir or None). The installed Tesseract's own data when it has the recording's
+    language and English; otherwise the runner's folder, filled from tessdata_fast. ("", None): nothing to read with."""
+    wanted = list(dict.fromkeys([TESSERACT_LANGS.get((language or "hu")[:2], "eng"), "eng"]))
+    have = installed_langs(cmd)
+    if all(lang in have for lang in wanted):
+        return "+".join(wanted), None
+    folder = tessdata_dir()
+    got = [lang for lang in wanted if fetch_tessdata(lang, folder)]
+    if got:
+        return "+".join(got), folder
+    got = [lang for lang in wanted if lang in have]  # offline: what the installed one has
+    return "+".join(got), None
+
+
+def ocr(cmd: str, path: str, langs: str, data: str | None = None) -> str:
+    extra = ["--tessdata-dir", data] if data else []
     try:
-        proc = subprocess.run([cmd, path, "stdout", "-l", langs, "--psm", "3"], capture_output=True, timeout=120,
-                              check=False, **tools.no_window())
+        proc = subprocess.run([cmd, path, "stdout", "-l", langs, "--psm", "3", *extra], capture_output=True,
+                              timeout=120, check=False, **tools.no_window())
     except (OSError, subprocess.SubprocessError):
         return ""
     lines = [" ".join(line.split()) for line in proc.stdout.decode("utf-8", "replace").splitlines()]
@@ -346,13 +426,18 @@ def run(video: str, options: dict[str, Any], cfg: Config, workdir: str, role: st
     cmd = tesseract(cfg)
     if cmd:
         stage("ocr")
-        langs = ocr_langs(cmd, language)
+        langs, data = ocr_langs(cmd, language)
+        if not langs:
+            cmd = None
+            out.warnings.append(_("A Tesseract nyelvi adatai nem tölthetők le; a diák szövegét most csak a látó modell "
+                                  "olvassa, ha van."))
+    if cmd:
         out.ocr = f"tesseract ({langs})"
         for f in out.frames:
             if cancelled():
                 raise WorkError(_("megszakítva"))
-            f.text = ocr(cmd, f.path, langs)
-    elif cfg.slides_ocr != "off":
+            f.text = ocr(cmd, f.path, langs, data)
+    elif cfg.slides_ocr != "off" and not out.warnings:
         out.warnings.append(_("A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek "
                               "szövegét csak a látó modell olvassa, ha van."))
     from . import langs as language_names, localllm

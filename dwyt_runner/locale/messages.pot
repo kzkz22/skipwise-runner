@@ -224,6 +224,10 @@ msgstr ""
 msgid "A Skipwise-ból is állítható:"
 msgstr ""
 
+#: slides.py:432
+msgid "A Tesseract nyelvi adatai nem tölthetők le; a diák szövegét most csak a látó modell olvassa, ha van."
+msgstr ""
+
 #: app/templates/telepites_4.html:155
 msgid "A Tovább gomb akkor lesz aktív, ha a „kell” jelű részek megvannak."
 msgstr ""
@@ -342,7 +346,7 @@ msgstr ""
 msgid "A diák feldolgozása nem sikerült: {exc}"
 msgstr ""
 
-#: slides.py:356
+#: slides.py:441
 msgid "A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek szövegét csak a látó modell olvassa, ha van."
 msgstr ""
 
@@ -359,7 +363,7 @@ msgstr ""
 msgid "A felvétel a(z) {urlsplit} oldalon van, ami nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr ""
 
-#: slides.py:341
+#: slides.py:421
 msgid "A felvételben nincs videókép, így diák sem; az átírás a diák nélkül készült."
 msgstr ""
 
@@ -554,7 +558,7 @@ msgstr ""
 msgid "A kulcsot a gép saját, védett kulcstárolójában őrizzük. A Skipwise sosem látja."
 msgstr ""
 
-#: slides.py:391
+#: slides.py:476
 msgid "A képeket a központ nem fogadta el (tárhely vagy régebbi verzió); a diák szövege megmaradt."
 msgstr ""
 
@@ -625,7 +629,7 @@ msgstr ""
 msgid "A letöltött modelleket töröltem ({d})."
 msgstr ""
 
-#: slides.py:379
+#: slides.py:464
 #, python-brace-format
 msgid "A látó modell egy képnél hibát adott: {exc}"
 msgstr ""
@@ -2130,7 +2134,7 @@ msgstr ""
 msgid "Nincs előző változat, amire visszaállhatnék."
 msgstr ""
 
-#: slides.py:382
+#: slides.py:467
 msgid "Nincs látó modell ehhez a felvételhez (llm_vision_model, a modell leírásában vision); a diákat csak a szövegük alapján használtam."
 msgstr ""
 
@@ -3235,7 +3239,7 @@ msgid "megnyitás a Skipwise-ban"
 msgstr ""
 
 #: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
-#: local.py:143 slides.py:101 slides.py:154 slides.py:353 slides.py:372
+#: local.py:143 slides.py:101 slides.py:154 slides.py:438 slides.py:457
 #: whispercpp.py:298 worker.py:142
 msgid "megszakítva"
 msgstr ""

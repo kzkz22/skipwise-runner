@@ -21,7 +21,7 @@ Az első indítás lépései ugyanazok, mint Windowson: [lásd ott](windows.md#a
 
 ## Diák a videókból (nem kötelező)
 
-A diák szövegéhez telepítsd a Tesseractot: `sudo apt install tesseract-ocr tesseract-ocr-hun` (Fedorán `sudo dnf install tesseract tesseract-langpack-hun`). Tesseract nélkül a diákat csak a látó modell olvassa, ha van.
+A diák szövegéhez telepítsd a Tesseractot: `sudo apt install tesseract-ocr` (Fedorán `sudo dnf install tesseract`). A nyelvi adatokat (például a magyart) a futtató maga tölti le, ha hiányoznak. Tesseract nélkül a diákat csak a látó modell olvassa, ha van.
 
 ## Frissítés és eltávolítás
 

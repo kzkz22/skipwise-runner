@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 09:41+0100\n"
+"POT-Creation-Date: 2026-11-04 10:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -268,6 +268,10 @@ msgstr "También se puede ajustar desde Skipwise"
 msgid "A Skipwise-ból is állítható:"
 msgstr "También se puede ajustar desde Skipwise:"
 
+#: slides.py:432
+msgid "A Tesseract nyelvi adatai nem tölthetők le; a diák szövegét most csak a látó modell olvassa, ha van."
+msgstr "No se pueden descargar los datos de idioma de Tesseract; por ahora solo el modelo de visión lee el texto de las diapositivas, si lo hay."
+
 #: app/templates/telepites_4.html:155
 msgid "A Tovább gomb akkor lesz aktív, ha a „kell” jelű részek megvannak."
 msgstr "El botón Siguiente se activa cuando las partes marcadas como «necesario» están listas."
@@ -388,7 +392,7 @@ msgstr "El runner guarda en la carpeta Originales las grabaciones propias subida
 msgid "A diák feldolgozása nem sikerült: {exc}"
 msgstr "No se pudieron procesar las diapositivas: {exc}"
 
-#: slides.py:356
+#: slides.py:441
 msgid "A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek szövegét csak a látó modell olvassa, ha van."
 msgstr "No hay Tesseract en este equipo para el texto de las diapositivas (tesseract_cmd); solo el modelo de visión lee las imágenes, si lo hay."
 
@@ -405,7 +409,7 @@ msgstr "No se puede leer el archivo de subtítulos."
 msgid "A felvétel a(z) {urlsplit} oldalon van, ami nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr "La grabación está en {urlsplit}, que no está entre los dominios permitidos (allowed_domains)."
 
-#: slides.py:341
+#: slides.py:421
 msgid "A felvételben nincs videókép, így diák sem; az átírás a diák nélkül készült."
 msgstr "La grabación no tiene imagen de vídeo, así que tampoco diapositivas; la transcripción se hizo sin ellas."
 
@@ -602,7 +606,7 @@ msgstr "Claves eliminadas del almacén de claves del sistema."
 msgid "A kulcsot a gép saját, védett kulcstárolójában őrizzük. A Skipwise sosem látja."
 msgstr "Guardamos la clave en el almacén protegido del propio equipo. Skipwise nunca la ve."
 
-#: slides.py:391
+#: slides.py:476
 msgid "A képeket a központ nem fogadta el (tárhely vagy régebbi verzió); a diák szövege megmaradt."
 msgstr "El servicio central no aceptó las imágenes (espacio o versión anterior); el texto de las diapositivas se conservó."
 
@@ -675,7 +679,7 @@ msgstr ""
 msgid "A letöltött modelleket töröltem ({d})."
 msgstr "Se han eliminado los modelos descargados ({d})."
 
-#: slides.py:379
+#: slides.py:464
 #, python-brace-format
 msgid "A látó modell egy képnél hibát adott: {exc}"
 msgstr "El modelo de visión falló en una imagen: {exc}"
@@ -2199,7 +2203,7 @@ msgstr "No hay servidor de modelos local configurado: skipwise-runner config set
 msgid "Nincs előző változat, amire visszaállhatnék."
 msgstr "No hay una versión anterior a la que volver."
 
-#: slides.py:382
+#: slides.py:467
 msgid "Nincs látó modell ehhez a felvételhez (llm_vision_model, a modell leírásában vision); a diákat csak a szövegük alapján használtam."
 msgstr "No hay modelo de visión para esta grabación (llm_vision_model, vision en la descripción del modelo); las diapositivas se usaron solo por su texto."
 
@@ -3315,7 +3319,7 @@ msgid "megnyitás a Skipwise-ban"
 msgstr "abrir en Skipwise"
 
 #: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
-#: local.py:143 slides.py:101 slides.py:154 slides.py:353 slides.py:372
+#: local.py:143 slides.py:101 slides.py:154 slides.py:438 slides.py:457
 #: whispercpp.py:298 worker.py:142
 msgid "megszakítva"
 msgstr "cancelado"

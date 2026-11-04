@@ -27,7 +27,7 @@ A futtató ablaka lépésenként végigvezet:
 
 ## Diák a videókból (nem kötelező)
 
-Ha a videók diáinak szövegét is fel szeretnéd használni, telepítsd a Tesseractot: a [UB Mannheim kiadása](https://github.com/UB-Mannheim/tesseract/wiki) telepítőjében jelöld be a magyar nyelvet (Additional language data → Hungarian). A futtató a PATH-on és a szokásos helyen (`C:\Program Files\Tesseract-OCR`) is megkeresi; ha máshova telepítetted, add meg a Működés fülön vagy így: `skipwise-runner config set tesseract_cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"`. Tesseract nélkül a diákat csak a látó modell olvassa, ha van.
+A diák szövegét kiolvasó Tesseract a telepítővel együtt érkezik (0.24.1-től), és a futtató frissítésével együtt frissül; külön telepíteni nem kell. A nyelvi adatokat (magyar, angol és a felvétel nyelve) a futtató az első diás munkánál tölti le, néhány MB nyelvenként. Ha már telepítetted a UB Mannheim-féle Tesseractot, az sem zavar: a futtató a saját példányát használja.
 
 ## Frissítés
 

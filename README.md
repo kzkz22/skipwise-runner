@@ -161,9 +161,11 @@ URL-nél a hang letöltése közben töltődik le a kép (legfeljebb 720p). Ha a
 
 A Tesseract telepítése:
 
-- Windows: a [UB Mannheim kiadása](https://github.com/UB-Mannheim/tesseract/wiki); a telepítőben jelöld be a magyar nyelvet (Additional language data → Hungarian). Ha nem a PATH-on van: `skipwise-runner config set tesseract_cmd "C:\Program Files\Tesseract-OCR\tesseract.exe"`.
-- Debian, Ubuntu: `sudo apt install tesseract-ocr tesseract-ocr-hun`.
-- macOS: `brew install tesseract tesseract-lang`.
+- Windows: nem kell semmit tenni; a Windows-telepítő hozza (a UB Mannheim Tesseract-kiadásából, `tesseract` mappa), és a frissítéssel együtt frissül.
+- Linux, szerver: az egysoros telepítő (`futtato.sh`) rendszergazdaként a rendszer csomagjából telepíti; kézzel: `sudo apt install tesseract-ocr` (Fedora: `sudo dnf install tesseract`).
+- Linux asztal (AppImage), macOS: kézzel, `sudo apt install tesseract-ocr`, illetve `brew install tesseract`.
+
+A nyelvi adatokat nem kell külön telepíteni: ha a felvétel nyelve (vagy az angol) hiányzik a telepített Tesseractból, a futtató letölti a tessdata_fast 4.1.0-s fájlját (SHA-256-tal ellenőrizve) az adatmappájába (`tessdata`). Ha a Tesseract máshol van: `skipwise-runner config set tesseract_cmd …`.
 
 Ki is kapcsolható: `skipwise-runner config set slides_ocr off`, illetve `slides_vision false`.
 

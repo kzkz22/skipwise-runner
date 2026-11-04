@@ -31,8 +31,8 @@ def fake_ocr(monkeypatch):
     texts = {1: "Negyedéves OKR áttekintés\nA Kubernetes klaszter és az S3 tároló",
              2: "Kovács Ödön bemutatja a GitHub Actions folyamatot", 3: ""}
     monkeypatch.setattr(slides, "tesseract", lambda cfg: "tesseract")
-    monkeypatch.setattr(slides, "ocr_langs", lambda cmd, language: "hun+eng")
-    monkeypatch.setattr(slides, "ocr", lambda cmd, path, langs: texts[int(path[-8:-4]) % 3 + 1]
+    monkeypatch.setattr(slides, "ocr_langs", lambda cmd, language: ("hun+eng", None))
+    monkeypatch.setattr(slides, "ocr", lambda cmd, path, langs, data=None: texts[int(path[-8:-4]) % 3 + 1]
                         if path[-8:-4].isdigit() else "")
     return texts
 
@@ -226,3 +226,45 @@ def test_corrections_see_what_was_on_screen():
     text = slides.on_screen(job, segs, found, True)
     assert "OKR" in text and "Negyedéves OKR" in text and "Kubernetes" not in text
     assert slides.on_screen({}, segs, found, True) == ""
+
+
+def test_ocr_languages_come_from_the_installed_tesseract_or_the_runners_folder(monkeypatch, tmp_path):
+    monkeypatch.setattr(slides, "tessdata_dir", lambda: str(tmp_path))
+    monkeypatch.setattr(slides, "installed_langs", lambda cmd: {"eng", "hun", "osd"})
+    assert slides.ocr_langs("tesseract", "hu") == ("hun+eng", None)  # apt's tesseract-ocr-hun: its own data
+    fetched = []
+    monkeypatch.setattr(slides, "installed_langs", lambda cmd: {"eng"})
+    monkeypatch.setattr(slides, "fetch_tessdata", lambda code, folder: fetched.append(code) or True)
+    assert slides.ocr_langs("tesseract", "de") == ("deu+eng", str(tmp_path))  # the runner fetches German
+    assert fetched == ["deu", "eng"]
+    monkeypatch.setattr(slides, "fetch_tessdata", lambda code, folder: False)  # offline
+    assert slides.ocr_langs("tesseract", "de") == ("eng", None)
+    monkeypatch.setattr(slides, "installed_langs", lambda cmd: set())
+    assert slides.ocr_langs("tesseract", "de") == ("", None)
+
+
+def test_tessdata_is_checked_before_use(monkeypatch, tmp_path):
+    import hashlib
+
+    import httpx
+    good = b"traineddata"
+    monkeypatch.setitem(slides.TESSDATA_SHA256, "hun", hashlib.sha256(good).hexdigest())
+    answers = [b"tampered", good]
+    monkeypatch.setattr(httpx, "get", lambda url, **kw: httpx.Response(200, content=answers.pop(0)))
+    assert slides.fetch_tessdata("hun", str(tmp_path)) is False and not (tmp_path / "hun.traineddata").exists()
+    assert slides.fetch_tessdata("hun", str(tmp_path)) is True
+    assert (tmp_path / "hun.traineddata").read_bytes() == good
+    assert slides.fetch_tessdata("hun", str(tmp_path)) is True  # already there: no download
+    assert slides.fetch_tessdata("xyz", str(tmp_path)) is False
+    assert set(slides.TESSDATA_SHA256) >= set(slides.TESSERACT_LANGS.values())
+
+
+def test_the_windows_package_carries_tesseract(cfg, monkeypatch, tmp_path):
+    import sys
+    exe = tmp_path / "tesseract" / "tesseract.exe"
+    exe.parent.mkdir()
+    exe.write_bytes(b"")
+    monkeypatch.setattr(sys, "prefix", str(tmp_path / "python"))
+    monkeypatch.setattr(slides.shutil, "which", lambda cmd: None)
+    monkeypatch.setattr(slides.os, "name", "nt")
+    assert slides.tesseract(cfg) == str(exe)
