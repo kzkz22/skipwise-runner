@@ -193,6 +193,10 @@ def run(job_input: dict[str, Any], llm: Llm, model: str, stage: Callable[[str], 
     hungarian = langs.is_source(language)
     system = SYSTEM if hungarian else SYSTEM_EN.format(language=langs.english_name(language))
     head = _header(job_input, entries, hungarian)
+    from .slides import on_screen  # what was on screen at the marked words (plan 19c round C)
+    screen = on_screen(job_input, segments, found, hungarian)
+    if screen:
+        head = (head.rstrip("\n") + "\n" if head else "") + screen + "\n\n"
     windows = _windows(lines(segments, found), chars_for(context_tokens, WINDOW_CHARS) - len(head))
     usage = Usage()
     fixes: dict[int, str] = {}

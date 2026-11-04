@@ -146,6 +146,9 @@ def _header(job_input: dict[str, Any], hungarian: bool) -> str:
     if terms:
         parts.append(f"{'Szakszavak, nevek (helyes írásmód)' if hungarian else 'Terms and names (correct spelling)'}: "
                      f"{', '.join(terms[:60])}")
+    from .slides import background  # the slides of the video (plan 19c round C)
+    if background(meta, hungarian):
+        parts.append(background(meta, hungarian))
     return "\n".join(parts) + "\n\n" if parts else ""
 
 

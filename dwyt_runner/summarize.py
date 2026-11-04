@@ -98,6 +98,9 @@ def _header(meta: dict, t: dict) -> str:
     if meta.get("page_text"):  # the page the recording was found on (19.10): background, not part of the recording
         lines.append("Az oldal szövege, ahol a felvétel megjelent (csak háttér, nem a felvétel része):\n"
                      + str(meta["page_text"])[:3000])
+    from .slides import background  # the slides of the video (plan 19c round C)
+    if background(meta, True):
+        lines.append(background(meta, True))
     lines.append(f"Az átirat nyelve: {t.get('language') or 'ismeretlen'}")
     lines.append(f"Az átirat forrása: {DESCRIBE.get(t.get('mode'), t.get('mode'))}")
     if t.get("mode") == "captions" and t.get("caption_kind") == "auto":
@@ -117,6 +120,9 @@ def _header_en(meta: dict, t: dict) -> str:
     if meta.get("page_text"):
         lines.append("Text of the page the recording appeared on (background only, not part of the recording):\n"
                      + str(meta["page_text"])[:3000])
+    from .slides import background
+    if background(meta, False):
+        lines.append(background(meta, False))
     lines.append(f"Language of the transcript: {langs.english_name(t.get('language'))}")
     lines.append(f"Source of the transcript: {DESCRIBE_EN.get(t.get('mode'), t.get('mode'))}")
     if t.get("mode") == "captions" and t.get("caption_kind") == "auto":

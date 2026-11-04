@@ -160,6 +160,9 @@ def _header(meta: dict[str, Any], hungarian: bool = True) -> str:
         parts.append(f"{'Cím' if hungarian else 'Title'}: {str(meta['title'])[:300]}")
     if meta.get("channel"):
         parts.append(f"{'Csatorna' if hungarian else 'Channel'}: {str(meta['channel'])[:200]}")
+    from .slides import background  # the slides of the video (plan 19c round C)
+    if background(meta, hungarian):
+        parts.append(background(meta, hungarian))
     return "\n".join(parts) + "\n\n" if parts else ""
 
 

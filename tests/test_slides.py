@@ -203,3 +203,26 @@ def test_tesseract_is_found_where_the_windows_installer_puts_it(cfg, monkeypatch
     assert slides.tesseract(cfg) == str(exe)
     cfg.tesseract_cmd = str(tmp_path / "nincs.exe")  # an explicit path is not second-guessed
     assert slides.tesseract(cfg) is None
+
+
+def test_slide_text_is_background_for_the_language_model_jobs(cfg, central, llm):
+    central.add_job(84, "summarize", {"role": "public", "language": "hu",
+                                      "meta": {"title": "Előadás", "slides_text": "[00:00] Negyedéves OKR\nCélok"},
+                                      "transcript": {"language": "hu", "mode": "cloud", "diarized": False,
+                                                     "segments": [{"start": 0, "end": 5, "text": "Jó napot."}]}})
+    _run_once(cfg, central)
+    assert 84 in central.results
+    user = llm.calls[0]["messages"][-1]["content"]
+    assert "A videón látszó diák szövege" in user and "Negyedéves OKR" in user
+
+
+def test_corrections_see_what_was_on_screen():
+    from dwyt_runner import refine
+    segs = [{"idx": 0, "start": 0, "end": 5, "text": "Az ókáer célok jók.", "low": [[3, 9]]},
+            {"idx": 1, "start": 200, "end": 205, "text": "Más téma."}]
+    job = {"slides": [{"start": 0, "end": 60, "text": "Negyedéves OKR", "terms": ["OKR"]},
+                      {"start": 190, "end": 300, "text": "Kubernetes klaszter", "terms": []}]}
+    found = refine.spots(segs, [])
+    text = slides.on_screen(job, segs, found, True)
+    assert "OKR" in text and "Negyedéves OKR" in text and "Kubernetes" not in text
+    assert slides.on_screen({}, segs, found, True) == ""

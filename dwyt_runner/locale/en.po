@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 09:16+0100\n"
+"POT-Creation-Date: 2026-11-04 09:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -388,7 +388,7 @@ msgstr "The runner keeps own recordings uploaded in the browser in the Originals
 msgid "A diák feldolgozása nem sikerült: {exc}"
 msgstr "Processing the slides failed: {exc}"
 
-#: slides.py:346
+#: slides.py:356
 msgid "A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek szövegét csak a látó modell olvassa, ha van."
 msgstr "There is no Tesseract on this machine for the slide text (tesseract_cmd); only the vision model reads the pictures, if there is one."
 
@@ -405,7 +405,7 @@ msgstr "The subtitle file cannot be read."
 msgid "A felvétel a(z) {urlsplit} oldalon van, ami nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr "The recording is on {urlsplit}, which is not among the allowed domains (allowed_domains)."
 
-#: slides.py:331
+#: slides.py:341
 msgid "A felvételben nincs videókép, így diák sem; az átírás a diák nélkül készült."
 msgstr "The recording has no video picture, so no slides either; the transcript was made without them."
 
@@ -602,7 +602,7 @@ msgstr "Keys deleted from the system key store."
 msgid "A kulcsot a gép saját, védett kulcstárolójában őrizzük. A Skipwise sosem látja."
 msgstr "We keep the key in the computer's own protected key store. Skipwise never sees it."
 
-#: slides.py:381
+#: slides.py:391
 msgid "A képeket a központ nem fogadta el (tárhely vagy régebbi verzió); a diák szövege megmaradt."
 msgstr "The central service did not accept the pictures (storage or an older version); the slide text was kept."
 
@@ -675,7 +675,7 @@ msgstr ""
 msgid "A letöltött modelleket töröltem ({d})."
 msgstr "The downloaded models were deleted ({d})."
 
-#: slides.py:369
+#: slides.py:379
 #, python-brace-format
 msgid "A látó modell egy képnél hibát adott: {exc}"
 msgstr "The vision model failed on a picture: {exc}"
@@ -2199,7 +2199,7 @@ msgstr "No local model server set up: skipwise-runner config set local_llm ollam
 msgid "Nincs előző változat, amire visszaállhatnék."
 msgstr "There is no previous version to go back to."
 
-#: slides.py:372
+#: slides.py:382
 msgid "Nincs látó modell ehhez a felvételhez (llm_vision_model, a modell leírásában vision); a diákat csak a szövegük alapján használtam."
 msgstr "No vision model for this recording (llm_vision_model, vision in the model info); the slides were used by their text only."
 
@@ -3315,7 +3315,7 @@ msgid "megnyitás a Skipwise-ban"
 msgstr "open in Skipwise"
 
 #: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
-#: local.py:143 slides.py:101 slides.py:154 slides.py:343 slides.py:362
+#: local.py:143 slides.py:101 slides.py:154 slides.py:353 slides.py:372
 #: whispercpp.py:298 worker.py:142
 msgid "megszakítva"
 msgstr "cancelled"

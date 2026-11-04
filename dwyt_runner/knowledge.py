@@ -101,6 +101,9 @@ def header(job_input: dict[str, Any], hungarian: bool) -> str:
     if words:
         unique = list(dict.fromkeys(words))[:GLOSSARY]
         parts.append(f"{'Ismert helyes alakok' if hungarian else 'Known correct forms'}: {', '.join(unique)}")
+    from .slides import background  # the slides of the video (plan 19c round C)
+    if background(meta, hungarian):
+        parts.append(background(meta, hungarian))
     return "\n".join(parts) + "\n\n" if parts else ""
 
 
