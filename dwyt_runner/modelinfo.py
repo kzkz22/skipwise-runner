@@ -26,7 +26,7 @@ def _text(value: Any, limit: int) -> str | None:
 
 def _clean(block: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    for key, limit in (("description", 200), ("target", 160), ("target_label", 160), ("provider", 40)):
+    for key, limit in (("description", 200), ("target", 160), ("target_label", 160), ("provider", 40), ("gpu", 60)):
         if _text(block.get(key), limit):
             out[key] = _text(block.get(key), limit)
     if block.get("where") in ("local", "cloud"):

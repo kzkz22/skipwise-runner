@@ -71,11 +71,21 @@ def test_status_shows_the_current_job_and_today(window):
     config.save(config.Config(server="https://dwyt.example", token="tok-1", name="otthoni gép"))
     job = {"job_id": 5, "kind": "transcribe", "input": {"source": {"kind": "youtube", "url": "https://youtu.be/x"},
                                                          "options": {"mode": "local"}}}
-    activity.start(job, config.Config(whisper_builtin=True))
+    from dwyt_runner import steps
+    tracker = steps.Tracker([steps._step("download", "this", "net"), steps._step("transcribe", "gpu", "gpu",
+                                                                                  gpu="RTX 3090"),
+                             steps._step("diarize", "this", "cpu"), steps._step("write", "this", "net")])
+    activity.start(job, config.Config(whisper_builtin=True), tracker)
+    for name in ("download", "transcribe", "diarize"):
+        tracker.enter(name)
     activity.stage("diarize")
     gpuswap.STATE.update(phase="whisper", models=["qwen3:8b"])
     page = client.get("/allapot").text
     assert "beszélők szétválasztása" in page and "ezen a gépen" in page and "Dolgozom" in page
+    # the step list (19.34): each step with its place and time
+    assert 'class="joblist"' in page and "GPU-gép · RTX 3090" in page and "Ez a gép · CPU" in page
+    assert page.count('class="done"') == 2 and 'class="now"' in page and "0 mp" in page
+    assert client.get("/api/allapot").json()["current"]["steps"][1]["place"] == "GPU-gép · RTX 3090"
     activity.finish("done")
     gpuswap.after_whisper()
     data = client.get("/api/allapot").json()

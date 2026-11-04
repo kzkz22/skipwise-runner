@@ -37,6 +37,17 @@
         <span class="right muted">{{ s.current.where }}</span></div>
       <div class="row"><div class="bar"><div class="fill busy"></div></div>
         <span class="muted">{{ s.current.stage_label }}{% if s.current.part %} · {{ s.current.part }}{% endif %} {{ _("· %(minutes)s perce", minutes=s.current.minutes) }}</span></div>
+      {% if s.current.steps %}
+      {# 19.34: every step with its place: what runs where, and how long it took #}
+      <ol class="joblist">
+      {% for st in s.current.steps %}
+        <li class="{{ st.state }}"><span class="mark" aria-hidden="true">{% if st.state == 'done' %}✓{% elif st.state == 'now' %}●{% else %}○{% endif %}</span>
+          <span class="what">{{ st.label }}{% if st.part %} · {{ st.part }}{% endif %}</span>
+          <span class="where">{{ st.place }}{% if st.model %} · {{ st.model }}{% endif %}</span>
+          <span class="time muted">{% if st.s is defined and st.state != 'next' %}{{ seconds(st.s) }}{% endif %}</span></li>
+      {% endfor %}
+      </ol>
+      {% endif %}
     </div>
   {% else %}
     <p class="muted">{% if s.running %}{{ _("Nincs munka; várom a következőt a Skipwise-ból.") }}{% else %}{{ _("A futtató nem fut.") }}{% endif %}</p>

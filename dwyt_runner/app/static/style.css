@@ -213,3 +213,12 @@ button.modecard { text-align: left; font: inherit; color: inherit; background: v
   align-items: flex-start; }
 .modecard.chosen { border: 2px solid var(--primary); background: var(--info-bg); padding: 13px 15px; }
 button.small { padding: 4px 10px; font-size: .9rem; }
+/* 19.34: the steps of the current job, each with its place */
+.joblist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+.joblist li { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; column-gap: 8px; align-items: baseline; }
+.joblist .mark { color: var(--muted); text-align: center; }
+.joblist .done .mark { color: var(--good); } .joblist .now .mark { color: var(--primary); }
+.joblist .next { color: var(--muted); }
+.joblist .now .what { font-weight: 600; }
+.joblist .where { grid-column: 2; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.joblist .time { grid-column: 3; grid-row: 1; font-size: 12px; white-space: nowrap; }

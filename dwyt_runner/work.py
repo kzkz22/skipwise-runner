@@ -9,7 +9,7 @@ from typing import Any, Callable
 from urllib.parse import urlsplit
 
 from . import (ask, captions, langs, categorize, chapters, cloud, gateway, indavideo, knowledge, local, localllm, media,
-               minutes, modelinfo, originals, refine, resolve, slides, summarize, tracks, translate, watch)
+               minutes, modelinfo, originals, refine, resolve, slides, steps, summarize, tracks, translate, watch)
 from .config import Config
 from .errors import WorkError
 from .llm import Llm
@@ -260,6 +260,8 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
         partial: Callable[[str, bool], None] | None = None) -> dict[str, Any]:
     """Validate the job strictly (the central service is not trusted blindly) and run it."""
     kind, data = job.get("kind"), job.get("input") or {}
+    if kind in ("transcribe", "drop_original"):
+        steps.begin(job, cfg)  # the step list with each step's place (19.34)
     if kind == "transcribe" and (data.get("source") or {}).get("kind") in ("upload", "local"):
         return _own_file(job, data, cfg, stage, cancelled, central)
     if kind == "drop_original":  # the user deleted a kept original (plan 19c)
@@ -353,6 +355,7 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
                                    "(llm_models, llm_private_models).").format(
                                   str=str(wanted)[:80]))
             model = str(wanted)
+        steps.begin(job, cfg, model)
         context = localllm.before_llm_job(cfg, model)  # a local model: its context decides the text sizes
         context = context or gateway.context(cfg.llm_url, model)  # AssemblyAI's trial model: 32K
         if localllm.uses_local(cfg):

@@ -7,7 +7,7 @@ import threading
 import time
 from typing import Any
 
-from .. import activity, config, gpuswap, trial, worker
+from .. import activity, config, gpuswap, steps, trial, worker
 from ..protocol import Central, CentralError, Outdated, Unauthorized
 from ..i18n import gettext as _
 
@@ -261,6 +261,10 @@ class Runtime:
             cur["part"] = _("{get}/{get2}. rész").format(
                 get=p.get('part'), get2=p.get('parts')) if p.get("parts") else ""
             cur["minutes"] = int((time.time() - cur.get("started", time.time())) // 60)
+            tracker = cur.pop("tracker", None)  # the step list with each step's place (19.34)
+            cur["steps"] = [dict(s, label=activity.STAGE_LABELS.get(s["id"], s["id"]),
+                                 place=steps.place_label(s), part=cur["part"] if s["state"] == "now" else "")
+                            for s in (tracker.payload() if tracker is not None else [])]
         recent = [dict(e, kind_label=activity.KIND_LABELS.get(e.get("kind"), e.get("kind") or ""))
                   for e in reversed(activity.history()[-8:])]
         swap = dict(gpuswap.STATE)

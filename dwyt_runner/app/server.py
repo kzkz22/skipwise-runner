@@ -23,7 +23,7 @@ from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .. import (__version__, autostart, config, gateway, i18n, keystore, localllm, machine, modes, release, remote,
-               settings, trial, updater, whispercpp)
+               settings, steps, trial, updater, whispercpp)
 from . import wizard
 from .runtime import Runtime
 from ..i18n import gettext as _
@@ -54,7 +54,7 @@ class App:
                                            newstyle=True)
         self.env.globals.update(ui_lang=i18n.current)
         self.env.globals.update(version=__version__, lamp_text=machine.LAMP_TEXT,
-                                card_swap=machine.card_swap_servers)
+                                card_swap=machine.card_swap_servers, seconds=steps.seconds_text)
 
     @property
     def start_url(self) -> str:

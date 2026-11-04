@@ -21,7 +21,7 @@ from typing import Any, Callable
 
 import httpx
 
-from . import formatting, media, whispercpp
+from . import formatting, media, steps, whispercpp
 from .config import Config
 from .errors import WorkError
 from .i18n import gettext as _
@@ -100,6 +100,9 @@ def transcribe_on_worker(flac: str, options: dict[str, Any], model: str, cfg: Co
                     raise WorkError(_("A Whisper-worker hibát jelzett: {error}").format(error=error[:600]))
                 if msg.get("stage"):
                     stage(str(msg["stage"]))
+                    if msg.get("device"):  # which card does it (19.34): "GPU-gép · RTX 3090", or its CPU
+                        steps.note(res="gpu" if msg["device"] == "cuda" else "cpu",
+                                   gpu=(msg.get("gpu") or "") if msg["device"] == "cuda" else "")
             if result is not None:
                 return result
     except (httpx.ConnectError, httpx.ConnectTimeout) as exc:
@@ -152,6 +155,10 @@ def run(fetch: media.Fetch | str, options: dict[str, Any], cfg: Config, stage: C
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
+    if raw.get("device"):  # where the transcription really ran (a GPU failure finishes on the CPU)
+        on_gpu = raw["device"] in ("cuda", "gpu")
+        gpu = (raw.get("gpu") or (steps.this_gpu() if not cfg.whisper_url else None) or "") if on_gpu else ""
+        steps.note("transcribe", res="gpu" if on_gpu else "cpu", gpu=gpu)
     language = (raw.get("language") or options.get("language") or "en").split("-")[0].lower()
     segments = formatting.clean_segments(raw.get("segments") or [])
     if not segments:

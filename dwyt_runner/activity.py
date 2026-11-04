@@ -25,6 +25,7 @@ STAGE_LABELS = labels({
     "chapters": N_("fejezetek írása"), "minutes": N_("emlékeztető írása"), "knowledge": N_("szójegyzék gyűjtése"),
     "refine": N_("bizonytalan szavak javítása"), "frames": N_("diák keresése a videóban"),
     "ocr": N_("diák szövegének olvasása"), "vision": N_("diák értelmezése"), "upload-frames": N_("diák feltöltése"),
+    "load-audio": N_("hang betöltése"), "align": N_("szavak időzítése"),
 })
 HISTORY_MAX = 200
 _lock = threading.Lock()
@@ -55,9 +56,11 @@ def where_of(job: dict[str, Any], cfg: config.Config) -> str:
     return _("ezen a gépen") if localllm.uses_local(cfg) else _("felhőben")
 
 
-def start(job: dict[str, Any], cfg: config.Config) -> None:
+def start(job: dict[str, Any], cfg: config.Config, tracker: Any = None) -> None:
     with _lock:
         CURRENT.clear()
+        if tracker is not None:
+            CURRENT["tracker"] = tracker  # the step list for the window (19.34)
         CURRENT.update(id=job.get("job_id"), kind=job.get("kind"), title=title_of(job), where=where_of(job, cfg),
                        stage="starting", progress=None, started=time.time())
 

@@ -369,9 +369,13 @@ def test_long_jobs_report_their_parts(cfg, central, llm, monkeypatch):
                                                                     self.beat()))
     _translate_job(central, 43)
     _run_once(cfg, central)
-    parts = [p for j, p in central.progress if j == 43]
+    parts = [p for j, p in central.progress if j == 43 and "part" in p]
     assert parts and parts[-1]["parts"] > 1 and parts[-1]["part"] == parts[-1]["parts"]
     assert parts[0]["model"] == "osszefoglalo"
+    # every heartbeat carries the step list (19.34): the translation on the LLM server, then the delivery
+    last = [p for j, p in central.progress if j == 43][-1]["steps"]
+    assert [s["id"] for s in last] == ["translate", "write"] and last[0]["state"] in ("now", "done")
+    assert last[0]["where"] == "this" and last[0]["model"] == "osszefoglalo"  # the fake LLM is on 127.0.0.1
 
 
 def test_speaker_options_reach_assemblyai():

@@ -10,7 +10,7 @@ import threading
 import time
 from typing import Any
 
-from . import activity, modelinfo, tools, watch, work
+from . import activity, modelinfo, steps, tools, watch, work
 from .config import Config
 from .errors import WorkError
 from .protocol import Central, CentralError, JobGone
@@ -25,7 +25,7 @@ RELOAD = threading.Event()  # the window saved new settings: read them before th
 
 
 class Job:
-    def __init__(self, central: Central, job: dict[str, Any]) -> None:
+    def __init__(self, central: Central, job: dict[str, Any], cfg: Config | None = None) -> None:
         self.central = central
         self.id = job["job_id"]
         self.data = job
@@ -40,10 +40,12 @@ class Job:
         self._partial_lock = threading.Lock()
         self._partial_thread: threading.Thread | None = None
         self.interval = min(HEARTBEAT_S, max(5, int(job.get("lease_s", 900)) / 3))
+        self.steps = steps.Tracker([], cfg)  # where each step runs (decision 19.34)
 
     def beat(self) -> None:
         try:
-            answer = self.central.heartbeat(self.id, self.stage_name, self.progress_data)
+            answer = self.central.heartbeat(self.id, self.stage_name,
+                                            {**(self.progress_data or {}), "steps": self.steps.payload()})
             self._last_beat = time.monotonic()
             if answer.get("cancel"):
                 self.cancel.set()
@@ -54,7 +56,10 @@ class Job:
             log.warning("heartbeat failed: %s", exc)
 
     def stage(self, name: str) -> None:
+        if name != self.stage_name:
+            self.progress_data = None  # the parts counted belong to the step before
         self.stage_name = name
+        self.steps.enter(name)
         activity.stage(name)
         log.info("job %s: %s", self.id, name)
         if time.monotonic() - self._last_beat > 5:
@@ -124,9 +129,10 @@ def deliver(central: Central, call, *args, stop: threading.Event | None = None) 
 
 
 def run_job(central: Central, cfg: Config, job_data: dict[str, Any], stop: threading.Event | None = None) -> str:
-    job = Job(central, job_data)
+    job = Job(central, job_data, cfg)
     log.info("job %s: %s", job.id, job_data.get("kind"))
-    activity.start(job_data, cfg)
+    activity.start(job_data, cfg, job.steps)
+    steps.track(job.steps)
     outcome, error = "crashed", ""
     beats = threading.Thread(target=job.heartbeats, daemon=True)
     beats.start()
@@ -141,6 +147,9 @@ def run_job(central: Central, cfg: Config, job_data: dict[str, Any], stop: threa
         if job.cancel.is_set():
             raise WorkError(_("megszakítva"))
         job.stage("write")
+        if isinstance(result, dict) and job_data.get("kind") == "transcribe":
+            # how it was made: the steps with their places and times (19.34)
+            result = {**result, "steps": job.steps.ran()}
         deliver(central, central.result, job.id, result, stop=stop)
         outcome = "done"
         return "done"
@@ -159,6 +168,7 @@ def run_job(central: Central, cfg: Config, job_data: dict[str, Any], stop: threa
         return "failed"
     finally:
         llm.watch_cancel(None)
+        steps.track(None)
         job.done.set()
         activity.finish(outcome, error)
 

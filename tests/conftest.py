@@ -444,13 +444,13 @@ class FakeWhisper:
                 import asyncio
                 import json as _json
                 for stage in ("waiting-for-gpu", "transcribe", "diarize"):
-                    yield _json.dumps({"stage": stage, "device": "cuda"}) + "\n"
+                    yield _json.dumps({"stage": stage, "device": "cuda", "gpu": "RTX 3090"}) + "\n"
                     await asyncio.sleep(fake.delay)
                 if fake.error:
                     yield _json.dumps({"error": fake.error}) + "\n"
                 elif not fake.cut:
-                    yield _json.dumps({"result": {"language": "hu", "device": "cuda", "diarized": True,
-                                                  "warnings": [], "segments": [
+                    yield _json.dumps({"result": {"language": "hu", "device": "cuda", "gpu": "RTX 3090",
+                                                  "diarized": True, "warnings": [], "segments": [
                         {"start": 0.5, "end": 2.0, "text": " Jó napot. ", "speaker": "SPEAKER_01"},
                         {"start": 2.2, "end": 4.0, "text": "Köszönöm.", "speaker": "SPEAKER_00"}]}}) + "\n"
 

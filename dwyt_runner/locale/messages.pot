@@ -85,6 +85,10 @@ msgstr ""
 msgid "(AssemblyAI · Qwen3.5 4B)."
 msgstr ""
 
+#: steps.py:285
+msgid "(ha nem elérhető: felhő)"
+msgstr ""
+
 #: app/templates/telepites_4.html:105
 msgid ""
 "(ingyenes, rendszergazdai jog nélkül is\n"
@@ -242,7 +246,7 @@ msgstr ""
 msgid "A Whisper-worker elutasította a munkát (HTTP {status_code}): {str}"
 msgstr ""
 
-#: local.py:118
+#: local.py:121
 msgid "A Whisper-worker eredmény nélkül zárta le a kapcsolatot (leállították vagy újraindult); később újrapróbálom."
 msgstr ""
 
@@ -251,12 +255,12 @@ msgstr ""
 msgid "A Whisper-worker hibát jelzett: {error}"
 msgstr ""
 
-#: local.py:106
+#: local.py:109
 #, python-brace-format
 msgid "A Whisper-worker nem érhető el ({whisper_url}): {exc}. Be van kapcsolva az AI-router? Később újrapróbálom."
 msgstr ""
 
-#: local.py:110
+#: local.py:113
 #, python-brace-format
 msgid "A Whisper-worker {FIRST_BYTE_S60} percig nem válaszolt; később újrapróbálom."
 msgstr ""
@@ -341,7 +345,7 @@ msgstr ""
 msgid "A böngészőből feltöltött saját felvételt a futtató az Eredetik mappában megtartja, így újraíráshoz nem kell újra feltölteni. A Skipwise-ban az elem oldalán vagy a Beállításokban törölhető."
 msgstr ""
 
-#: work.py:208 work.py:320
+#: work.py:208 work.py:322
 #, python-brace-format
 msgid "A diák feldolgozása nem sikerült: {exc}"
 msgstr ""
@@ -358,7 +362,7 @@ msgstr ""
 msgid "A feliratfájl nem olvasható."
 msgstr ""
 
-#: work.py:292
+#: work.py:294
 #, python-brace-format
 msgid "A felvétel a(z) {urlsplit} oldalon van, ami nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr ""
@@ -420,7 +424,7 @@ msgstr ""
 msgid "A futtató frissítése magától"
 msgstr ""
 
-#: worker.py:156
+#: worker.py:165
 #, python-brace-format
 msgid "A futtató hibára futott: {type}: {exc}"
 msgstr ""
@@ -429,7 +433,7 @@ msgstr ""
 msgid "A futtató leáll; amíg nem indítod el újra, nem vesz fel munkát"
 msgstr ""
 
-#: worker.py:244
+#: worker.py:254
 msgid "A futtató leállt, mielőtt elkezdte; később újra kiadható."
 msgstr ""
 
@@ -442,7 +446,7 @@ msgstr ""
 msgid "A futtató már fut; előhoztam az ablakát."
 msgstr ""
 
-#: app/templates/allapot.html:42
+#: app/templates/allapot.html:53
 msgid "A futtató nem fut."
 msgstr ""
 
@@ -506,7 +510,7 @@ msgstr ""
 msgid "A géped alapján "
 msgstr ""
 
-#: cloud.py:164 local.py:158
+#: cloud.py:164 local.py:165
 msgid "A hangban nem volt felismerhető beszéd."
 msgstr ""
 
@@ -772,7 +776,7 @@ msgstr ""
 msgid "A whisper.cpp és a beszélők szétválasztása ezen a gépen fut, a modelleket egyszer tölti le (kb. 3,5 GB). Videókártyával gyors, nélküle lassú."
 msgstr ""
 
-#: local.py:172
+#: local.py:179
 msgid "A worker CPU-n futott (nem látott GPU-t)."
 msgstr ""
 
@@ -853,7 +857,7 @@ msgstr ""
 msgid "A(z) {title} nincs telepítve ezen a gépen (local_llm = {local_llm})."
 msgstr ""
 
-#: work.py:279
+#: work.py:281
 #, python-brace-format
 msgid "A(z) {urlsplit} oldal nincs az engedélyezett tartományok között (allowed_domains)."
 msgstr ""
@@ -1119,7 +1123,7 @@ msgstr ""
 msgid "Az oldal nem érhető el ({exc}); később újrapróbálom."
 msgstr ""
 
-#: work.py:331
+#: work.py:333
 #, python-brace-format
 msgid "Az oldalon ezt találtam: {label}, {url}. {exc}"
 msgstr ""
@@ -1132,12 +1136,12 @@ msgstr ""
 msgid "Az oldalon nincs YouTube-videó, így felirat sincs hozzá; válassz helyi vagy felhős átírást."
 msgstr ""
 
-#: local.py:163
+#: local.py:170
 #, python-brace-format
 msgid "Az átiratból {n} ismétlődő részt kihagytam (a Whisper ismétlő hurka)."
 msgstr ""
 
-#: local.py:173
+#: local.py:180
 msgid "Az átírás a processzoron futott."
 msgstr ""
 
@@ -1193,6 +1197,10 @@ msgstr ""
 
 #: app/templates/telepites_4.html:74
 msgid "Bármelyik modell választható, a jobbak magyarul is jól írnak. Külön regisztráció kell."
+msgstr ""
+
+#: steps.py:263
+msgid "CPU"
 msgstr ""
 
 #: app/templates/gepem.html:100
@@ -1277,11 +1285,11 @@ msgstr ""
 msgid "Ennek a futtatónak nincs AssemblyAI-kulcsa (skipwise-runner config set assemblyai_key ...)."
 msgstr ""
 
-#: local.py:128
+#: local.py:131
 msgid "Ennek a futtatónak nincs helyi Whispere (skipwise-runner config set whisper_url ..., vagy ezen a gépen: skipwise-runner config set whisper_builtin igen)."
 msgstr ""
 
-#: work.py:348
+#: work.py:350
 #, python-brace-format
 msgid "Ennek a futtatónak nincs modellje ehhez ({role})."
 msgstr ""
@@ -1310,12 +1318,12 @@ msgstr ""
 msgid "Ez a felirat képként van tárolva, szövegként nem olvasható ki. Válassz helyi vagy felhős átírást."
 msgstr ""
 
-#: work.py:284
+#: work.py:286
 #, python-brace-format
 msgid "Ez a futtató nem tud ilyen módot: {mode}."
 msgstr ""
 
-#: app/templates/telepites_1.html:8
+#: app/templates/telepites_1.html:8 steps.py:261
 msgid "Ez a gép"
 msgstr ""
 
@@ -1367,16 +1375,16 @@ msgstr ""
 msgid "Ezen a gépen nincs whisper-cli. Telepítsd (például a whisper.cpp csomagjából), vagy add meg a helyét: skipwise-runner config set whisper_cli /út/whisper-cli"
 msgstr ""
 
-#: local.py:132
+#: local.py:135
 #, python-brace-format
 msgid "Ezt a Whisper-modellt a futtató nem ismeri: {model} (whisper_models: {join})."
 msgstr ""
 
-#: work.py:277
+#: work.py:279
 msgid "Ezt a forrást ez a futtató nem dolgozza fel."
 msgstr ""
 
-#: work.py:352
+#: work.py:354
 #, python-brace-format
 msgid "Ezt a modellt a futtató nem ajánlja fel ehhez: {str} (llm_models, llm_private_models)."
 msgstr ""
@@ -1397,7 +1405,7 @@ msgstr ""
 msgid "Fejezetek"
 msgstr ""
 
-#: modes.py:15
+#: modes.py:15 steps.py:261
 msgid "Felhő"
 msgstr ""
 
@@ -1493,6 +1501,14 @@ msgstr ""
 
 #: settings.py:157
 msgid "GB"
+msgstr ""
+
+#: steps.py:263
+msgid "GPU"
+msgstr ""
+
+#: steps.py:261
+msgid "GPU-gép"
 msgstr ""
 
 #: settings.py:114
@@ -1611,7 +1627,7 @@ msgstr ""
 msgid "Hiba: {exc}"
 msgstr ""
 
-#: work.py:166 work.py:268
+#: work.py:166 work.py:270
 msgid "Hibás fájlazonosító a munkában."
 msgstr ""
 
@@ -1687,7 +1703,7 @@ msgstr ""
 msgid "Ismeretlen kulcs."
 msgstr ""
 
-#: work.py:383
+#: work.py:386
 #, python-brace-format
 msgid "Ismeretlen munkafajta: {kind}."
 msgstr ""
@@ -1842,6 +1858,10 @@ msgstr ""
 msgid "Kössük össze a Skipwise-fiókoddal"
 msgstr ""
 
+#: steps.py:262
+msgid "Központ"
+msgstr ""
+
 #: settings.py:90
 msgid "Külön GPU-gép (AI-router)"
 msgstr ""
@@ -1870,7 +1890,7 @@ msgstr ""
 msgid "Legnagyobb fájl"
 msgstr ""
 
-#: app/templates/allapot.html:46
+#: app/templates/allapot.html:57
 msgid "Legutóbb"
 msgstr ""
 
@@ -1895,7 +1915,7 @@ msgstr ""
 msgid "MB"
 msgstr ""
 
-#: app/templates/allapot.html:54
+#: app/templates/allapot.html:65
 msgid "Ma:"
 msgstr ""
 
@@ -1913,7 +1933,7 @@ msgid ""
 "  helyi modellszerver, összefoglal vele egy rövid szöveget."
 msgstr ""
 
-#: local.py:115
+#: local.py:118
 #, python-brace-format
 msgid "Megszakadt a kapcsolat a Whisper-workerrel ({exc}); később újrapróbálom (a kész átírási lépés megmarad a workeren)."
 msgstr ""
@@ -2138,7 +2158,7 @@ msgstr ""
 msgid "Nincs látó modell ehhez a felvételhez (llm_vision_model, a modell leírásában vision); a diákat csak a szövegük alapján használtam."
 msgstr ""
 
-#: app/templates/allapot.html:42
+#: app/templates/allapot.html:53
 msgid "Nincs munka; várom a következőt a Skipwise-ból."
 msgstr ""
 
@@ -2149,6 +2169,10 @@ msgstr ""
 #: whispercpp.py:212
 #, python-brace-format
 msgid "Nincs whisper-cli ebben a mappában: {path} (whisper_cli)."
+msgstr ""
+
+#: steps.py:262
+msgid "Nyelvimodell-szerver"
 msgstr ""
 
 #: app/templates/allapot.html:11
@@ -2507,7 +2531,7 @@ msgstr ""
 msgid "YouTube-feliratból"
 msgstr ""
 
-#: work.py:297
+#: work.py:299
 msgid "YouTube-feliratot csak YouTube-videóhoz lehet kérni."
 msgstr ""
 
@@ -2543,7 +2567,7 @@ msgstr ""
 msgid "a GPU-gép végzi"
 msgstr ""
 
-#: activity.py:52
+#: activity.py:53
 msgid "a GPU-gépen"
 msgstr ""
 
@@ -2853,7 +2877,7 @@ msgstr ""
 msgid "ez a kulcs a Skipwise-ból nem állítható"
 msgstr ""
 
-#: activity.py:52 activity.py:55 app/templates/mukodes.html:39
+#: activity.py:53 activity.py:56 app/templates/mukodes.html:39
 #: app/templates/telepites_3.html:30
 msgid "ezen a gépen"
 msgstr ""
@@ -2879,7 +2903,7 @@ msgstr ""
 msgid "fejezetek írása"
 msgstr ""
 
-#: activity.py:50 activity.py:55 settings.py:147
+#: activity.py:51 activity.py:56 settings.py:147
 msgid "felhőben"
 msgstr ""
 
@@ -2937,7 +2961,7 @@ msgstr ""
 msgid "fizetős, a te kulcsoddal"
 msgstr ""
 
-#: activity.py:23 app/templates/allapot.html:54
+#: activity.py:23 app/templates/allapot.html:65
 msgid "fordítás"
 msgstr ""
 
@@ -2976,6 +3000,10 @@ msgstr ""
 msgid "ha épp te használsz egy modellt, legfeljebb %(polite_wait_min)s percet várok, mielőtt kiveszem a memóriából"
 msgstr ""
 
+#: activity.py:28
+msgid "hang betöltése"
+msgstr ""
+
 #: activity.py:20
 msgid "hang előkészítése"
 msgstr ""
@@ -2986,6 +3014,10 @@ msgstr ""
 
 #: settings.py:147
 msgid "helyben"
+msgstr ""
+
+#: steps.py:264
+msgid "helyben nincs terhelés"
 msgstr ""
 
 #: cli.py:196
@@ -3025,6 +3057,10 @@ msgstr ""
 
 #: app/templates/allapot.html:19 app/templates/telepites_5.html:24
 msgid "https://skipwise.app"
+msgstr ""
+
+#: steps.py:263
+msgid "hálózat"
 msgstr ""
 
 #: activity.py:19
@@ -3143,7 +3179,7 @@ msgstr ""
 msgid "képként"
 msgstr ""
 
-#: app/templates/allapot.html:54
+#: app/templates/allapot.html:65
 msgid "kérdés"
 msgstr ""
 
@@ -3209,6 +3245,10 @@ msgstr ""
 msgid "legalább {SMALL_LLM_VRAM_GB} GB videómemória kellene"
 msgstr ""
 
+#: steps.py:263
+msgid "lemez"
+msgstr ""
+
 #: captions.py:110
 msgid "letölteni a feliratot"
 msgstr ""
@@ -3234,13 +3274,13 @@ msgstr ""
 msgid "llm {action}: add meg a modell nevét"
 msgstr ""
 
-#: app/templates/allapot.html:55
+#: app/templates/allapot.html:66
 msgid "megnyitás a Skipwise-ban"
 msgstr ""
 
 #: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
-#: local.py:143 slides.py:101 slides.py:154 slides.py:438 slides.py:457
-#: whispercpp.py:298 worker.py:142
+#: local.py:146 slides.py:101 slides.py:154 slides.py:438 slides.py:457
+#: whispercpp.py:298 worker.py:148
 msgid "megszakítva"
 msgstr ""
 
@@ -3282,7 +3322,7 @@ msgstr ""
 msgid "még nincs letöltött modell"
 msgstr ""
 
-#: app/templates/allapot.html:54
+#: app/templates/allapot.html:65
 msgid "még semmi"
 msgstr ""
 
@@ -3465,6 +3505,10 @@ msgstr ""
 msgid "sk-or-…"
 msgstr ""
 
+#: activity.py:28
+msgid "szavak időzítése"
+msgstr ""
+
 #: activity.py:25
 msgid "szójegyzék gyűjtése"
 msgstr ""
@@ -3575,6 +3619,11 @@ msgstr ""
 msgid "{get}/{get2}. rész"
 msgstr ""
 
+#: steps.py:297
+#, python-brace-format
+msgid "{h} ó {m} p"
+msgstr ""
+
 #: machine.py:489
 #, python-brace-format
 msgid "{installed} telepítve, de nem fut"
@@ -3618,6 +3667,16 @@ msgstr ""
 #: trial.py:98
 #, python-brace-format
 msgid "{model}, {where} · egy 1 órás videó {_minutes} alatt kész, beszélőkkel"
+msgstr ""
+
+#: steps.py:296
+#, python-brace-format
+msgid "{m} p {s} mp"
+msgstr ""
+
+#: steps.py:294
+#, python-brace-format
+msgid "{s} mp"
 msgstr ""
 
 #: cli.py:319 cli.py:322
@@ -3763,7 +3822,7 @@ msgstr ""
 msgid "Üresen az alapértelmezett."
 msgstr ""
 
-#: activity.py:20 app/templates/allapot.html:54
+#: activity.py:20 app/templates/allapot.html:65
 msgid "átírás"
 msgstr ""
 
@@ -3779,7 +3838,7 @@ msgstr ""
 msgid "átírás és összefoglaló ezen a gépen"
 msgstr ""
 
-#: app/templates/allapot.html:54
+#: app/templates/allapot.html:65
 msgid "összefoglaló"
 msgstr ""
 
