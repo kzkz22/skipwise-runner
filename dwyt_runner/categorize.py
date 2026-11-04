@@ -5,8 +5,6 @@ instructions (it comes from a video anyone could have made).
 """
 from __future__ import annotations
 
-import json
-import re
 from typing import Any, Callable
 
 from . import langs
@@ -88,14 +86,9 @@ def _header(meta: dict[str, Any], hungarian: bool = True) -> str:
 
 def parse(text: str, categories: list[dict[str, Any]]) -> dict[str, Any] | None:
     """The model's answer as {main, side, suggestion}, ids only from the list; None when it is not readable."""
-    found = re.search(r"\{.*\}", text or "", re.S)
-    if not found:
-        return None
-    try:
-        data = json.loads(found.group(0))
-    except ValueError:
-        return None
-    if not isinstance(data, dict):
+    from .structured import first_object
+    data = first_object(text)
+    if data is None:
         return None
     known = {int(c["id"]) for c in categories}
 
@@ -135,15 +128,12 @@ def choose(llm: Llm, model: str, categories: list[dict[str, Any]], summary: str,
         categories=_listing(categories), header=_header(meta, hungarian), summary=summary.strip()[:SUMMARY_CHARS],
         **({} if hungarian else {"language": langs.english_name(language)}))
     messages = [{"role": "system", "content": SYSTEM if hungarian else SYSTEM_EN}, {"role": "user", "content": user}]
-    for _attempt in range(2):
-        answer = usage.add(llm.complete(model, messages, temperature=0.1))
-        chosen = parse(answer.text, categories)
-        if chosen is not None:
-            return chosen
-        messages += [{"role": "assistant", "content": answer.text[:2000]},
-                     {"role": "user", "content": "Csak a JSON-objektumot írd, a megadott alakban." if hungarian
-                      else "Write only the JSON object, in the given form."}]
-    return None
+    from . import structured
+    try:
+        return structured.ask(llm, model, messages, usage, hungarian, "kategória",
+                              lambda text: parse(text, categories))
+    except structured.Unreadable:
+        return None
 
 
 def after_summary(job_input: dict[str, Any], result: dict[str, Any], llm: Llm, model: str) -> None:

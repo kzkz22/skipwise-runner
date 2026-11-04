@@ -330,7 +330,7 @@ def vision_model(cfg: Config, role: str | None) -> str:
 
 
 def describe(llm: Any, model: str, frame: Frame, hungarian: bool) -> None:
-    from .minutes import parse_object
+    from .structured import parse_object
     with open(frame.path, "rb") as fh:
         data = base64.b64encode(fh.read()).decode("ascii")
     text = VISION_PROMPT if hungarian else VISION_PROMPT_EN
@@ -338,7 +338,7 @@ def describe(llm: Any, model: str, frame: Frame, hungarian: bool) -> None:
         text += ("\n\nOCR szerint a képen: " if hungarian else "\n\nOCR read on the picture: ") + frame.text[:1500]
     picture = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{data}"}}
     messages = [{"role": "user", "content": [{"type": "text", "text": text}, picture]}]
-    answer = llm.complete(model, messages, temperature=0.1)
+    answer = llm.complete(model, messages, temperature=0.1, json_mode=True)
     found = parse_object(answer.text, ("terms",)) or {}
     frame.kind = found.get("kind") if found.get("kind") in KINDS else ""
     frame.title = " ".join(str(found.get("title") or "").split())[:160]

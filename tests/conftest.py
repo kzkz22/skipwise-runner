@@ -308,6 +308,8 @@ class FakeLlm:
                                     status_code=400)
             if fake.status != 200:
                 return JSONResponse({"error": {"message": fake.message}}, status_code=fake.status)
+            if body.get("response_format") and fake.no_json_mode:  # an older server (19.35)
+                return JSONResponse({"error": {"message": "Unsupported parameter: response_format"}}, status_code=400)
             result = answer_for(body)
             if not (body.get("stream") and fake.stream):
                 return result
@@ -418,6 +420,7 @@ class FakeLlm:
         self.info, self.info_calls = None, 0  # /model/info rows (LiteLLM); None = not a LiteLLM
         self.category_answers: list[str] = []
         self.vision_calls: list[dict] = []
+        self.no_json_mode = False
         self.vision_answers: list[str] = []
         self.minutes_answers: list[str] = []
         self.knowledge_answers: list[str] = []
@@ -561,6 +564,8 @@ def isolated(tmp_path, monkeypatch, central, assembly, llm, whisper, audio_file,
     ytdlp_update._wanted_soon.clear()
     monkeypatch.setattr(worker, "DELIVERY_DELAYS", (0.05, 0.05, 0.05))
     modelinfo.reset()
+    from dwyt_runner import llm as llm_module
+    llm_module.NO_JSON_MODE.clear()
     yield
 
 

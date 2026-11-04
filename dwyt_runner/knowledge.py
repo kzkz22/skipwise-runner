@@ -12,9 +12,10 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from . import langs
+from . import langs, structured
 from .chapters import hms, seconds_of
 from .errors import WorkError
+from .i18n import gettext as _
 from .llm import Llm, Usage, chars_for
 from .minutes import _windows, listing, parse_object
 
@@ -141,15 +142,8 @@ def clean(data: Any, transcript_text: str, starts: list[int] | None = None) -> l
 
 
 def _ask(llm: Llm, model: str, messages: list[dict[str, str]], usage: Usage, hungarian: bool) -> dict[str, Any]:
-    for _attempt in range(2):
-        answer = usage.add(llm.complete(model, messages, temperature=0.1))
-        data = parse_object(answer.text, ("entries",))
-        if data is not None:
-            return data
-        messages = messages + [{"role": "assistant", "content": answer.text[:2000]},
-                               {"role": "user", "content": "Csak a JSON-objektumot írd, a megadott alakban."
-                                if hungarian else "Write only the JSON object, in the given form."}]
-    raise WorkError("A modell válaszából nem lett használható szójegyzék (nem a kért JSON-alakban válaszolt).")
+    return structured.ask(llm, model, messages, usage, hungarian, _("szójegyzék"),
+                          lambda text: parse_object(text, ("entries",)))
 
 
 def run(job_input: dict[str, Any], llm: Llm, model: str, stage: Callable[[str], None] = lambda s: None,
@@ -174,10 +168,14 @@ def run(job_input: dict[str, Any], llm: Llm, model: str, stage: Callable[[str], 
         progress({"part": n + 1, "parts": len(windows), "model": model})
         part = "" if len(windows) == 1 else (
             f" – {n + 1}. rész, összesen {len(windows)}" if hungarian else f" (part {n + 1} of {len(windows)})")
-        user = (PROMPT if hungarian else PROMPT_EN).format(
-            part=part, header=head, lines="\n".join(f"[{hms(at)}] {t}" for at, t in window))
-        found += clean(_ask(llm, model, [{"role": "system", "content": system}, {"role": "user", "content": user}],
-                            usage, hungarian), text, starts)
+
+        def one(lines_: list[tuple[float, str]], part: str = part) -> list[dict[str, Any]]:
+            user = (PROMPT if hungarian else PROMPT_EN).format(
+                part=part, header=head, lines="\n".join(f"[{hms(at)}] {t}" for at, t in lines_))
+            return clean(_ask(llm, model, [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                              usage, hungarian), text, starts)
+        for entries in structured.ask_split(window, one):  # a long part the model garbled: again in two halves
+            found += entries
     merged: dict[str, dict[str, Any]] = {}
     for entry in found:  # the same term from several parts: one entry, variants together, the earliest time
         key = entry["term"].casefold()

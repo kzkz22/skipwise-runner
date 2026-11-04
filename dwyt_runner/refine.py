@@ -11,8 +11,8 @@ from __future__ import annotations
 import re
 from typing import Any, Callable
 
-from . import langs
-from .errors import WorkError
+from . import langs, structured
+from .i18n import gettext as _
 from .llm import Llm, Usage, chars_for
 from .minutes import parse_object
 
@@ -208,16 +208,8 @@ def run(job_input: dict[str, Any], llm: Llm, model: str, stage: Callable[[str], 
         user = (PROMPT if hungarian else PROMPT_EN).format(part=part, header=head,
                                                            lines="\n".join(text for text, _ in window))
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        for _attempt in range(2):
-            answer = usage.add(llm.complete(model, messages, temperature=0.1))
-            data = parse_object(answer.text, ("fixes",))
-            if data is not None:
-                break
-            messages = messages + [{"role": "assistant", "content": answer.text[:2000]},
-                                   {"role": "user", "content": "Csak a JSON-objektumot írd, a megadott alakban."
-                                    if hungarian else "Write only the JSON object, in the given form."}]
-        else:
-            raise WorkError("A modell válaszából nem lett használható javítás (nem a kért JSON-alakban válaszolt).")
+        data = structured.ask(llm, model, messages, usage, hungarian, _("javítás"),
+                              lambda text: parse_object(text, ("fixes",)))
         for fix in data.get("fixes") or []:
             if not isinstance(fix, dict) or not isinstance(fix.get("n"), int) or fix["n"] not in own:
                 continue

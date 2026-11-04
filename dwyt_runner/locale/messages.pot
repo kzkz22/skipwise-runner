@@ -646,7 +646,12 @@ msgstr ""
 msgid "A magától frissítés ki van kapcsolva (Működés lap, részletes beállítások)."
 msgstr ""
 
-#: llm.py:264
+#: structured.py:34
+#, python-brace-format
+msgid "A modell válaszából nem lett használható {what} (nem a kért JSON-alakban válaszolt; később újrapróbálom). A válasz eleje: „{snippet}”"
+msgstr ""
+
+#: llm.py:286
 msgid "A modell üres választ adott."
 msgstr ""
 
@@ -802,32 +807,32 @@ msgstr ""
 msgid "A(z) {code} felirat nem érhető el json3 formában."
 msgstr ""
 
-#: llm.py:181
+#: llm.py:203
 #, python-brace-format
 msgid "A(z) {model} modell most nem érhető el (HTTP {status_code})."
 msgstr ""
 
-#: llm.py:143
+#: llm.py:160
 #, python-brace-format
 msgid "A(z) {model} modell percenkénti kerete elfogyott (HTTP 429); később újrapróbálom."
 msgstr ""
 
-#: llm.py:244
+#: llm.py:266
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt (a kapcsolat megszakadt); később újrapróbálom."
 msgstr ""
 
-#: llm.py:229
+#: llm.py:251
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt: {str}"
 msgstr ""
 
-#: llm.py:213
+#: llm.py:235
 #, python-brace-format
 msgid "A(z) {model} modell {int} perc alatt sem végzett; később újrapróbálom."
 msgstr ""
 
-#: llm.py:172
+#: llm.py:194
 #, python-brace-format
 msgid "A(z) {model} modell {int} perce nem küldött semmit; a kapcsolat valószínűleg megszakadt. Később újrapróbálom."
 msgstr ""
@@ -1004,12 +1009,12 @@ msgstr ""
 msgid "Az Indavideo válasza nem olvasható; lehet, hogy a lejátszója megváltozott."
 msgstr ""
 
-#: llm.py:192
+#: llm.py:214
 #, python-brace-format
 msgid "Az LLM-szerver elutasította a kérést (HTTP {status_code}): {detail}"
 msgstr ""
 
-#: llm.py:176
+#: llm.py:198
 #, python-brace-format
 msgid "Az LLM-szerver kapcsolata megszakadt ({exc}); később újrapróbálom."
 msgstr ""
@@ -1018,12 +1023,12 @@ msgstr ""
 msgid "Az LLM-szerver kulcsa"
 msgstr ""
 
-#: llm.py:187
+#: llm.py:209
 #, python-brace-format
 msgid "Az LLM-szerver nem fogadta el a kulcsot (HTTP {status_code}: {detail}). Ellenőrizd: skipwise-runner config set llm_key ... (LiteLLM-nél a LITELLM_MASTER_KEY értéke), majd indítsd újra a futtatót."
 msgstr ""
 
-#: llm.py:200
+#: llm.py:222
 msgid "Az LLM-szerver válasza nem értelmezhető."
 msgstr ""
 
@@ -2851,6 +2856,10 @@ msgstr ""
 msgid "ehhez legalább {LARGE_LLM_VRAM_GB} GB videómemória kellene"
 msgstr ""
 
+#: minutes.py:194
+msgid "emlékeztető"
+msgstr ""
+
 #: activity.py:25
 msgid "emlékeztető írása"
 msgstr ""
@@ -3091,6 +3100,10 @@ msgstr ""
 msgid "itt vannak a kulcsaid"
 msgstr ""
 
+#: refine.py:211
+msgid "javítás"
+msgstr ""
+
 #: app/templates/telepites_4.html:73
 msgid "jobb minőség"
 msgstr ""
@@ -3278,7 +3291,7 @@ msgstr ""
 msgid "megnyitás a Skipwise-ban"
 msgstr ""
 
-#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
+#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:233 local.py:87
 #: local.py:146 slides.py:101 slides.py:154 slides.py:438 slides.py:457
 #: whispercpp.py:298 worker.py:148
 msgid "megszakítva"
@@ -3507,6 +3520,10 @@ msgstr ""
 
 #: activity.py:28
 msgid "szavak időzítése"
+msgstr ""
+
+#: knowledge.py:145
+msgid "szójegyzék"
 msgstr ""
 
 #: activity.py:25

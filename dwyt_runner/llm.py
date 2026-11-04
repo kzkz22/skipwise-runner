@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import threading
 import time
@@ -12,6 +13,8 @@ import httpx
 
 from .errors import WorkError
 from .i18n import gettext as _
+
+log = logging.getLogger(__name__)
 
 _THINK = re.compile(r"<think>.*?</think>", re.S)
 STALL_S = 180  # the answer comes as a stream: this long without a byte means the connection is dead
@@ -108,6 +111,17 @@ def chat_url(base: str) -> str:
     return f"{base}/chat/completions" if base.endswith("/v1") else f"{base}/v1/chat/completions"
 
 
+class EmptyAnswer(WorkError):
+    """Nothing but thinking (or nothing at all) came back."""
+
+
+class JsonModeRefused(Exception):
+    """The server or the model does not take response_format: asked again without it."""
+
+
+NO_JSON_MODE: set = set()  # chat URLs (or URL + model) that refused response_format in this run
+
+
 class Llm:
     def __init__(self, base_url: str, api_key: str, timeout: float = 2400,
                  extra: dict[str, Any] | None = None, stall_s: float = STALL_S,
@@ -125,7 +139,7 @@ class Llm:
                              temperature)
 
     def complete(self, model: str, messages: list[dict], temperature: float | None = 0.3,
-                 on_text: Callable[[str, bool], None] | None = None) -> Answer:
+                 on_text: Callable[[str, bool], None] | None = None, json_mode: bool = False) -> Answer:
         """A whole conversation; temperature None leaves it to the server (the model's preset).
 
         The answer is asked for as a stream (every OpenAI-compatible server can): a dead connection shows up
@@ -134,23 +148,43 @@ class Llm:
         AssemblyAI account) is waited out a few times before the job is handed back for later.
 
         on_text(text so far, thinking): called as the answer comes, with the visible text (thinking left out) and
-        whether the model is still thinking; used to show a question's answer as it is written (19a item 8)."""
-        for attempt in range(RATE_TRIES + 1):
+        whether the model is still thinking; used to show a question's answer as it is written (19a item 8).
+
+        json_mode: the answer must be one JSON object (`response_format: json_object`; llama-server then only lets the
+        model write valid JSON). A server or model that refuses the field is asked again without it, and this
+        address is remembered for the rest of the run (decision 19.35)."""
+        json_mode = json_mode and self.url not in NO_JSON_MODE and (self.url, model) not in NO_JSON_MODE
+        attempt = 0
+        while True:
             try:
-                return self._complete(model, messages, temperature, on_text)
+                return self._complete(model, messages, temperature, on_text, json_mode)
+            except JsonModeRefused:
+                NO_JSON_MODE.add(self.url)
+                json_mode = False
+                continue
+            except EmptyAnswer:
+                if not json_mode:
+                    raise
+                # a thinking model whose JSON grammar left it nothing to write: once more without the grammar
+                log.warning("empty answer from %s in JSON mode: asking again without it", model)
+                NO_JSON_MODE.add((self.url, model))  # this model, for the rest of the run
+                json_mode = False
+                continue
             except RateLimited as exc:
                 if attempt == RATE_TRIES:
                     raise WorkError(_("A(z) {model} modell percenkénti kerete elfogyott (HTTP 429); "
                                        "később újrapróbálom.").format(
                                       model=model), "later") from exc
                 _wait(exc.retry_after or RATE_WAIT_S[min(attempt, len(RATE_WAIT_S) - 1)])
-        raise AssertionError("unreachable")
+                attempt += 1
 
     def _complete(self, model: str, messages: list[dict], temperature: float | None,
-                  on_text: Callable[[str, bool], None] | None = None) -> Answer:
+                  on_text: Callable[[str, bool], None] | None = None, json_mode: bool = False) -> Answer:
         started = time.monotonic()
         body: dict = {"model": model, "messages": messages, "stream": True,
                       "stream_options": {"include_usage": True}, **self.extra}
+        if json_mode:
+            body["response_format"] = {"type": "json_object"}
         if self.fixed_temperature is not None:
             temperature = self.fixed_temperature
         if temperature is not None:
@@ -163,6 +197,9 @@ class Llm:
                     raise RateLimited(_retry_after(resp))
                 if resp.status_code >= 400:
                     resp.read()
+                    if json_mode and resp.status_code in (400, 404, 415, 422) and re.search(
+                            r"response_format|json_object|json mode|json_schema|grammar", _error(resp), re.I):
+                        raise JsonModeRefused()
                     self._refused(resp, model)
                 if "text/event-stream" not in resp.headers.get("content-type", ""):
                     resp.read()
@@ -261,7 +298,7 @@ def visible(text: str, reasoning: bool = False) -> tuple[str, bool]:
 def _answer(text: str, model: str | None, usage: dict, started: float) -> Answer:
     text = _THINK.sub("", text).strip()
     if not text:
-        raise WorkError(_("A modell üres választ adott."), "later")
+        raise EmptyAnswer(_("A modell üres választ adott."), "later")
     details = usage.get("completion_tokens_details") or {}
     return Answer(text=text, model=model, prompt_tokens=usage.get("prompt_tokens"),
                   completion_tokens=usage.get("completion_tokens"), seconds=time.monotonic() - started,

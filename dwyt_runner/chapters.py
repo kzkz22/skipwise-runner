@@ -7,7 +7,6 @@ own (kind `chapters`, `run`). The transcript is data, not instructions. A failur
 """
 from __future__ import annotations
 
-import json
 import re
 from typing import Any, Callable
 
@@ -167,16 +166,10 @@ def _header(meta: dict[str, Any], hungarian: bool = True) -> str:
 
 
 def parse(text: str) -> list[dict[str, Any]] | None:
-    """The model's answer as raw [{start, title}]; None when it is not readable."""
-    found = re.search(r"\{.*\}", text or "", re.S)
-    if not found:
-        return None
-    try:
-        data = json.loads(found.group(0))
-    except ValueError:
-        return None
-    chapters = data.get("chapters") if isinstance(data, dict) else None
-    return chapters if isinstance(chapters, list) else None
+    """The model's answer as raw [{start, title}]; None when it is not readable (read tolerantly, 19.35)."""
+    from .structured import parse_object
+    data = parse_object(text, ("chapters",))
+    return data["chapters"] if data is not None else None
 
 
 def _ask(llm: Llm, model: str, window: list[tuple[float, str]], end_s: float, meta: dict[str, Any],
@@ -189,25 +182,22 @@ def _ask(llm: Llm, model: str, window: list[tuple[float, str]], end_s: float, me
         lines="\n".join(f"[{hms(at)}] {text}" for at, text in window))
     system = SYSTEM if hungarian else SYSTEM_EN.format(language=langs.english_name(language))
     messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    for _attempt in range(2):
-        answer = usage.add(llm.complete(model, messages, temperature=0.2))
-        raw = parse(answer.text)
-        if raw is not None:
-            starts = {int(at) for at, _ in window}
-            # only times of the listed lines (a model may round or invent; the nearest earlier line is meant)
-            fixed = []
-            for c in raw:
-                at = seconds_of(c.get("start")) if isinstance(c, dict) else None
-                if at is None:
-                    continue
-                near = max((s for s in starts if s <= at + 2), default=None)
-                if near is not None:
-                    fixed.append({"start": near, "title": c.get("title")})
-            return fixed
-        messages += [{"role": "assistant", "content": answer.text[:2000]},
-                     {"role": "user", "content": "Csak a JSON-objektumot írd, a megadott alakban." if hungarian
-                      else "Write only the JSON object, in the given form."}]
-    return []
+    from . import structured
+    try:
+        raw = structured.ask(llm, model, messages, usage, hungarian, "fejezetlista", parse, temperature=0.2)
+    except structured.Unreadable:
+        return []
+    starts = {int(at) for at, _ in window}
+    # only times of the listed lines (a model may round or invent; the nearest earlier line is meant)
+    fixed = []
+    for c in raw:
+        at = seconds_of(c.get("start")) if isinstance(c, dict) else None
+        if at is None:
+            continue
+        near = max((s for s in starts if s <= at + 2), default=None)
+        if near is not None:
+            fixed.append({"start": near, "title": c.get("title")})
+    return fixed
 
 
 def make(llm: Llm, model: str, transcript: dict[str, Any], meta: dict[str, Any], usage: Usage,

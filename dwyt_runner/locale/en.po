@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 12:56+0100\n"
+"POT-Creation-Date: 2026-11-04 14:56+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -696,7 +696,12 @@ msgstr "Automatic updates are turned off (Operation tab)."
 msgid "A magától frissítés ki van kapcsolva (Működés lap, részletes beállítások)."
 msgstr "Automatic updates are turned off (Operation tab, detailed settings)."
 
-#: llm.py:264
+#: structured.py:34
+#, python-brace-format
+msgid "A modell válaszából nem lett használható {what} (nem a kért JSON-alakban válaszolt; később újrapróbálom). A válasz eleje: „{snippet}”"
+msgstr "The model's answer did not give a usable {what} (it did not answer in the JSON form asked for; I will try again later). The beginning of the answer: “{snippet}”"
+
+#: llm.py:286
 msgid "A modell üres választ adott."
 msgstr "The model gave an empty answer."
 
@@ -852,32 +857,32 @@ msgstr "yt-dlp could not {what}: {text}"
 msgid "A(z) {code} felirat nem érhető el json3 formában."
 msgstr "The {code} subtitles are not available in json3 form."
 
-#: llm.py:181
+#: llm.py:203
 #, python-brace-format
 msgid "A(z) {model} modell most nem érhető el (HTTP {status_code})."
 msgstr "The model {model} is not available now (HTTP {status_code})."
 
-#: llm.py:143
+#: llm.py:160
 #, python-brace-format
 msgid "A(z) {model} modell percenkénti kerete elfogyott (HTTP 429); később újrapróbálom."
 msgstr "The model {model} has used up its per-minute limit (HTTP 429); I'll try again later."
 
-#: llm.py:244
+#: llm.py:266
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt (a kapcsolat megszakadt); később újrapróbálom."
 msgstr "The answer of the model {model} broke off (the connection was lost); I'll try again later."
 
-#: llm.py:229
+#: llm.py:251
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt: {str}"
 msgstr "The answer of the model {model} broke off: {str}"
 
-#: llm.py:213
+#: llm.py:235
 #, python-brace-format
 msgid "A(z) {model} modell {int} perc alatt sem végzett; később újrapróbálom."
 msgstr "The model {model} did not finish within {int} minutes; I'll try again later."
 
-#: llm.py:172
+#: llm.py:194
 #, python-brace-format
 msgid "A(z) {model} modell {int} perce nem küldött semmit; a kapcsolat valószínűleg megszakadt. Később újrapróbálom."
 msgstr "The model {model} has sent nothing for {int} minutes; the connection was probably lost. I'll try again later."
@@ -1059,12 +1064,12 @@ msgstr "Indavideo cannot be reached ({exc}); I'll try again later."
 msgid "Az Indavideo válasza nem olvasható; lehet, hogy a lejátszója megváltozott."
 msgstr "Indavideo's answer cannot be read; its player may have changed."
 
-#: llm.py:192
+#: llm.py:214
 #, python-brace-format
 msgid "Az LLM-szerver elutasította a kérést (HTTP {status_code}): {detail}"
 msgstr "The LLM server refused the request (HTTP {status_code}): {detail}"
 
-#: llm.py:176
+#: llm.py:198
 #, python-brace-format
 msgid "Az LLM-szerver kapcsolata megszakadt ({exc}); később újrapróbálom."
 msgstr "The connection to the LLM server was lost ({exc}); I'll try again later."
@@ -1073,12 +1078,12 @@ msgstr "The connection to the LLM server was lost ({exc}); I'll try again later.
 msgid "Az LLM-szerver kulcsa"
 msgstr "LLM server key"
 
-#: llm.py:187
+#: llm.py:209
 #, python-brace-format
 msgid "Az LLM-szerver nem fogadta el a kulcsot (HTTP {status_code}: {detail}). Ellenőrizd: skipwise-runner config set llm_key ... (LiteLLM-nél a LITELLM_MASTER_KEY értéke), majd indítsd újra a futtatót."
 msgstr "The LLM server did not accept the key (HTTP {status_code}: {detail}). Check: skipwise-runner config set llm_key ... (with LiteLLM, the value of LITELLM_MASTER_KEY), then restart the runner."
 
-#: llm.py:200
+#: llm.py:222
 msgid "Az LLM-szerver válasza nem értelmezhető."
 msgstr "The LLM server's answer cannot be understood."
 
@@ -2926,6 +2931,10 @@ msgstr "a large (around 30B) model fits too; the Hungarian text comes close to a
 msgid "ehhez legalább {LARGE_LLM_VRAM_GB} GB videómemória kellene"
 msgstr "this would need at least {LARGE_LLM_VRAM_GB} GB of video memory"
 
+#: minutes.py:194
+msgid "emlékeztető"
+msgstr "minutes"
+
 #: activity.py:25
 msgid "emlékeztető írása"
 msgstr "writing the minutes"
@@ -3166,6 +3175,10 @@ msgstr "unknown error"
 msgid "itt vannak a kulcsaid"
 msgstr "your keys are here"
 
+#: refine.py:211
+msgid "javítás"
+msgstr "correction"
+
 #: app/templates/telepites_4.html:73
 msgid "jobb minőség"
 msgstr "better quality"
@@ -3358,7 +3371,7 @@ msgstr "llm {action}: give the model's name"
 msgid "megnyitás a Skipwise-ban"
 msgstr "open in Skipwise"
 
-#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:211 local.py:87
+#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:233 local.py:87
 #: local.py:146 slides.py:101 slides.py:154 slides.py:438 slides.py:457
 #: whispercpp.py:298 worker.py:148
 msgid "megszakítva"
@@ -3592,6 +3605,10 @@ msgstr "sk-or-…"
 #: activity.py:28
 msgid "szavak időzítése"
 msgstr "aligning words"
+
+#: knowledge.py:145
+msgid "szójegyzék"
+msgstr "glossary"
 
 #: activity.py:25
 msgid "szójegyzék gyűjtése"

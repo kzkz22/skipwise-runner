@@ -8,12 +8,13 @@ not said), a time for every point. The transcript and the meeting data are only 
 from __future__ import annotations
 
 import json
-import re
 from typing import Any, Callable
 
-from . import langs
+from . import langs, structured
 from .chapters import hms, seconds_of
 from .errors import WorkError
+from .i18n import gettext as _
+from .structured import parse_object  # noqa: F401 - shared with knowledge, refine and slides (19.35)
 from .llm import Llm, Usage, chars_for
 
 PROMPT_VERSION = 1
@@ -152,20 +153,6 @@ def _header(job_input: dict[str, Any], hungarian: bool) -> str:
     return "\n".join(parts) + "\n\n" if parts else ""
 
 
-def parse_object(text: str, keys: tuple[str, ...]) -> dict[str, Any] | None:
-    """The JSON object in a model's answer (code fences and words around it allowed) with a list under one of keys."""
-    found = re.search(r"\{.*\}", text or "", re.S)
-    if not found:
-        return None
-    try:
-        data = json.loads(found.group(0))
-    except ValueError:
-        return None
-    if not isinstance(data, dict) or not any(isinstance(data.get(k), list) for k in keys):
-        return None
-    return data
-
-
 def parse(text: str) -> dict[str, Any] | None:
     return parse_object(text, tuple(LIMITS))
 
@@ -204,15 +191,7 @@ def clean(data: Any, starts: list[int] | None = None) -> dict[str, list[dict[str
 
 
 def _ask(llm: Llm, model: str, messages: list[dict[str, str]], usage: Usage, hungarian: bool) -> dict[str, Any]:
-    for _attempt in range(2):
-        answer = usage.add(llm.complete(model, messages, temperature=0.2))
-        data = parse(answer.text)
-        if data is not None:
-            return data
-        messages = messages + [{"role": "assistant", "content": answer.text[:2000]},
-                               {"role": "user", "content": "Csak a JSON-objektumot írd, a megadott alakban."
-                                if hungarian else "Write only the JSON object, in the given form."}]
-    raise WorkError("A modell válaszából nem lett használható emlékeztető (nem a kért JSON-alakban válaszolt).")
+    return structured.ask(llm, model, messages, usage, hungarian, _("emlékeztető"), parse, temperature=0.2)
 
 
 def make(llm: Llm, model: str, job_input: dict[str, Any], usage: Usage, context_tokens: int | None = None,
@@ -231,10 +210,13 @@ def make(llm: Llm, model: str, job_input: dict[str, Any], usage: Usage, context_
         progress({"part": n + 1, "parts": len(windows) + (1 if len(windows) > 1 else 0), "model": model})
         part = "" if len(windows) == 1 else (
             f" – {n + 1}. rész, összesen {len(windows)}" if hungarian else f" (part {n + 1} of {len(windows)})")
-        user = (PROMPT if hungarian else PROMPT_EN).format(
-            part=part, header=header, lines="\n".join(f"[{hms(at)}] {text}" for at, text in window))
-        found.append(clean(_ask(llm, model, [{"role": "system", "content": system}, {"role": "user", "content": user}],
-                                usage, hungarian), starts))
+
+        def one(lines_: list[tuple[float, str]], part: str = part) -> dict[str, list[dict[str, Any]]]:
+            user = (PROMPT if hungarian else PROMPT_EN).format(
+                part=part, header=header, lines="\n".join(f"[{hms(at)}] {text}" for at, text in lines_))
+            return clean(_ask(llm, model, [{"role": "system", "content": system}, {"role": "user", "content": user}],
+                              usage, hungarian), starts)
+        found += structured.ask_split(window, one)  # a long part the model garbled: again in two halves
     if len(found) == 1:
         return found[0]
     progress({"part": len(windows) + 1, "parts": len(windows) + 1, "model": model})
