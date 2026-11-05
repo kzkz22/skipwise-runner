@@ -114,6 +114,8 @@ class from_url(Fetch):  # noqa: N801 - reads like a function at the call site
     def info(self) -> dict[str, Any]:
         if self._info is None:
             self._info = probe(self.url, self.cfg)
+            from . import steps
+            steps.length(self._info.get("duration"))  # the central times the job by it (19.36)
         return self._info
 
     def get(self, workdir: str) -> str:
@@ -134,7 +136,10 @@ class from_file(Fetch):  # noqa: N801
         self.subtitle_used: int | None = None
 
     def info(self) -> dict[str, Any]:
-        return {"title": self.name, "duration": duration(self.path) if self.path else None}
+        found = {"title": self.name, "duration": duration(self.path) if self.path else None}
+        from . import steps
+        steps.length(found["duration"])  # the central times the job by it (19.36)
+        return found
 
     def verified(self, workdir: str) -> str:
         """The file itself (checked), with its tracks read; no audio track chosen yet."""

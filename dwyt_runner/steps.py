@@ -153,6 +153,7 @@ class Tracker:
         self.lock = threading.Lock()
         self.current: dict[str, Any] | None = None
         self.started = 0.0
+        self.duration: float | None = None  # the recording's length (19.36)
 
     def enter(self, stage: str) -> None:
         with self.lock:
@@ -295,3 +296,10 @@ def seconds_text(s: float | None) -> str:
     if s < 3600:
         return _("{m} p {s} mp").format(m=s // 60, s=s % 60)
     return _("{h} ó {m} p").format(h=s // 3600, m=s % 3600 // 60)
+
+
+def length(seconds: Any) -> None:
+    """The recording's length, once known (sent with the heartbeats: the central's expected end, 19.36)."""
+    tracker = getattr(_local, "tracker", None)
+    if tracker is not None and isinstance(seconds, (int, float)) and not isinstance(seconds, bool) and seconds > 0:
+        tracker.duration = float(seconds)

@@ -44,8 +44,10 @@ class Job:
 
     def beat(self) -> None:
         try:
-            answer = self.central.heartbeat(self.id, self.stage_name,
-                                            {**(self.progress_data or {}), "steps": self.steps.payload()})
+            progress = {**(self.progress_data or {}), "steps": self.steps.payload()}
+            if self.steps.duration:
+                progress["duration_s"] = round(self.steps.duration)
+            answer = self.central.heartbeat(self.id, self.stage_name, progress)
             self._last_beat = time.monotonic()
             if answer.get("cancel"):
                 self.cancel.set()
@@ -147,8 +149,8 @@ def run_job(central: Central, cfg: Config, job_data: dict[str, Any], stop: threa
         if job.cancel.is_set():
             raise WorkError(_("megszakítva"))
         job.stage("write")
-        if isinstance(result, dict) and job_data.get("kind") == "transcribe":
-            # how it was made: the steps with their places and times (19.34)
+        if isinstance(result, dict) and job_data.get("kind") != "drop_original":
+            # how it was made: the steps with their places and times (19.34); the central times later jobs by them
             result = {**result, "steps": job.steps.ran()}
         deliver(central, central.result, job.id, result, stop=stop)
         outcome = "done"

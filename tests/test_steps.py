@@ -68,6 +68,9 @@ def test_the_tracker_follows_the_stages():
 
 
 def test_a_local_job_reports_the_gpu_hosts_card(cfg, central, whisper, monkeypatch):
+    from dwyt_runner import worker
+    stage = worker.Job.stage
+    monkeypatch.setattr(worker.Job, "stage", lambda self, name: (stage(self, name), self.beat()))  # every step
     cfg.whisper_url = whisper.url
     yt_dlp.REGISTRY["videos"][VIDEO] = _video()
     central.add_job(90, "transcribe", {"source": {"kind": "youtube", "url": VIDEO},
@@ -77,5 +80,14 @@ def test_a_local_job_reports_the_gpu_hosts_card(cfg, central, whisper, monkeypat
     assert ids(ran) == ["download", "prepare-audio", "waiting-for-gpu", "transcribe", "diarize"]
     tr = next(s for s in ran if s["id"] == "transcribe")
     assert tr == {**tr, "where": "gpu", "res": "gpu", "gpu": "RTX 3090", "state": "done"} and "s" in tr
-    beats = [p["steps"] for j, p in central.progress if j == 90]
-    assert beats and any(s["state"] == "now" for s in beats[0])
+    beats = [p for j, p in central.progress if j == 90]
+    assert beats and any(s["state"] == "now" for s in beats[0]["steps"])
+    assert any(p.get("duration_s") == 120 for p in beats)  # the recording's length, once known (19.36)
+
+
+def test_every_result_carries_its_steps(cfg, central, llm):
+    from test_runner import _translate_job
+    _translate_job(central, 91)
+    _run_once(cfg, central)
+    ran = central.results[91]["steps"]  # the central times later jobs by them (19.36)
+    assert ids(ran) == ["translate"] and ran[0]["state"] == "done" and ran[0]["s"] >= 0
