@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: dwyt-runner VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-04 14:56+0100\n"
+"POT-Creation-Date: 2026-11-15 21:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -113,7 +113,7 @@ msgstr "(%(server)s/futtatok)"
 msgid "(AssemblyAI · Qwen3.5 4B)."
 msgstr "(AssemblyAI · Qwen3.5 4B)."
 
-#: steps.py:285
+#: steps.py:304
 msgid "(ha nem elérhető: felhő)"
 msgstr "(if unavailable: cloud)"
 
@@ -400,11 +400,11 @@ msgstr "Processing the slides failed: {exc}"
 msgid "A diák szövegéhez nincs Tesseract ezen a gépen (tesseract_cmd); a képek szövegét csak a látó modell olvassa, ha van."
 msgstr "There is no Tesseract on this machine for the slide text (tesseract_cmd); only the vision model reads the pictures, if there is one."
 
-#: captions.py:117 tracks.py:242
+#: captions.py:143 tracks.py:242
 msgid "A felirat üres."
 msgstr "The subtitles are empty."
 
-#: captions.py:114
+#: captions.py:140
 msgid "A feliratfájl nem olvasható."
 msgstr "The subtitle file cannot be read."
 
@@ -470,7 +470,7 @@ msgstr "The runner only connects outwards; nobody can reach your computer from o
 msgid "A futtató frissítése magától"
 msgstr "Update the runner automatically"
 
-#: worker.py:165
+#: worker.py:167
 #, python-brace-format
 msgid "A futtató hibára futott: {type}: {exc}"
 msgstr "The runner hit an error: {type}: {exc}"
@@ -479,7 +479,7 @@ msgstr "The runner hit an error: {type}: {exc}"
 msgid "A futtató leáll; amíg nem indítod el újra, nem vesz fel munkát"
 msgstr "The runner stops; until you start it again it takes no jobs"
 
-#: worker.py:254
+#: worker.py:256
 msgid "A futtató leállt, mielőtt elkezdte; később újra kiadható."
 msgstr "The runner stopped before starting it; it can be handed out again later."
 
@@ -530,7 +530,7 @@ msgstr "The file is no longer on this machine (it was moved or deleted from the 
 msgid "A fájl nagyobb, mint amennyit ez a futtató elfogad (max_file_mb)."
 msgstr "The file is larger than this runner accepts (max_file_mb)."
 
-#: media.py:144
+#: media.py:149
 msgid "A fájl tartalma nem egyezik a beküldöttel (megváltozott vagy sérült)."
 msgstr "The file's content does not match what was submitted (changed or damaged)."
 
@@ -701,7 +701,7 @@ msgstr "Automatic updates are turned off (Operation tab, detailed settings)."
 msgid "A modell válaszából nem lett használható {what} (nem a kért JSON-alakban válaszolt; később újrapróbálom). A válasz eleje: „{snippet}”"
 msgstr "The model's answer did not give a usable {what} (it did not answer in the JSON form asked for; I will try again later). The beginning of the answer: “{snippet}”"
 
-#: llm.py:286
+#: llm.py:301
 msgid "A modell üres választ adott."
 msgstr "The model gave an empty answer."
 
@@ -790,7 +790,7 @@ msgstr "It failed on the graphics card, so it ran on the processor (slower)."
 msgid "A videókártyán épp a beszédfelismerő fut; a nyelvi modellt addig kivettem a memóriából."
 msgstr "Speech recognition is running on the graphics card; I took the language model out of memory until then."
 
-#: captions.py:99
+#: captions.py:125
 #, python-brace-format
 msgid "A videónak nincs felirata a saját nyelvén ({lang}). Válassz helyi vagy felhős átírást."
 msgstr "The video has no subtitles in its own language ({lang}). Choose local or cloud transcription."
@@ -852,37 +852,37 @@ msgstr "yt-dlp did not create a video file."
 msgid "A yt-dlp nem tudta {what}: {text}"
 msgstr "yt-dlp could not {what}: {text}"
 
-#: captions.py:105
+#: captions.py:131
 #, python-brace-format
 msgid "A(z) {code} felirat nem érhető el json3 formában."
 msgstr "The {code} subtitles are not available in json3 form."
 
-#: llm.py:203
+#: llm.py:218
 #, python-brace-format
 msgid "A(z) {model} modell most nem érhető el (HTTP {status_code})."
 msgstr "The model {model} is not available now (HTTP {status_code})."
 
-#: llm.py:160
+#: llm.py:175
 #, python-brace-format
 msgid "A(z) {model} modell percenkénti kerete elfogyott (HTTP 429); később újrapróbálom."
 msgstr "The model {model} has used up its per-minute limit (HTTP 429); I'll try again later."
 
-#: llm.py:266
+#: llm.py:281
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt (a kapcsolat megszakadt); később újrapróbálom."
 msgstr "The answer of the model {model} broke off (the connection was lost); I'll try again later."
 
-#: llm.py:251
+#: llm.py:266
 #, python-brace-format
 msgid "A(z) {model} modell válasza félbeszakadt: {str}"
 msgstr "The answer of the model {model} broke off: {str}"
 
-#: llm.py:235
+#: llm.py:250
 #, python-brace-format
 msgid "A(z) {model} modell {int} perc alatt sem végzett; később újrapróbálom."
 msgstr "The model {model} did not finish within {int} minutes; I'll try again later."
 
-#: llm.py:194
+#: llm.py:209
 #, python-brace-format
 msgid "A(z) {model} modell {int} perce nem küldött semmit; a kapcsolat valószínűleg megszakadt. Később újrapróbálom."
 msgstr "The model {model} has sent nothing for {int} minutes; the connection was probably lost. I'll try again later."
@@ -1064,12 +1064,12 @@ msgstr "Indavideo cannot be reached ({exc}); I'll try again later."
 msgid "Az Indavideo válasza nem olvasható; lehet, hogy a lejátszója megváltozott."
 msgstr "Indavideo's answer cannot be read; its player may have changed."
 
-#: llm.py:214
+#: llm.py:229
 #, python-brace-format
 msgid "Az LLM-szerver elutasította a kérést (HTTP {status_code}): {detail}"
 msgstr "The LLM server refused the request (HTTP {status_code}): {detail}"
 
-#: llm.py:198
+#: llm.py:213
 #, python-brace-format
 msgid "Az LLM-szerver kapcsolata megszakadt ({exc}); később újrapróbálom."
 msgstr "The connection to the LLM server was lost ({exc}); I'll try again later."
@@ -1078,12 +1078,12 @@ msgstr "The connection to the LLM server was lost ({exc}); I'll try again later.
 msgid "Az LLM-szerver kulcsa"
 msgstr "LLM server key"
 
-#: llm.py:209
+#: llm.py:224
 #, python-brace-format
 msgid "Az LLM-szerver nem fogadta el a kulcsot (HTTP {status_code}: {detail}). Ellenőrizd: skipwise-runner config set llm_key ... (LiteLLM-nél a LITELLM_MASTER_KEY értéke), majd indítsd újra a futtatót."
 msgstr "The LLM server did not accept the key (HTTP {status_code}: {detail}). Check: skipwise-runner config set llm_key ... (with LiteLLM, the value of LITELLM_MASTER_KEY), then restart the runner."
 
-#: llm.py:222
+#: llm.py:237
 msgid "Az LLM-szerver válasza nem értelmezhető."
 msgstr "The LLM server's answer cannot be understood."
 
@@ -1259,7 +1259,7 @@ msgstr "Embedded player"
 msgid "Bármelyik modell választható, a jobbak magyarul is jól írnak. Külön regisztráció kell."
 msgstr "Any model can be chosen; the better ones also write good Hungarian. Needs its own sign-up."
 
-#: steps.py:263
+#: steps.py:282
 msgid "CPU"
 msgstr "CPU"
 
@@ -1385,7 +1385,7 @@ msgstr "These subtitles are stored as images and cannot be read as text. Choose 
 msgid "Ez a futtató nem tud ilyen módot: {mode}."
 msgstr "This runner cannot do this mode: {mode}."
 
-#: app/templates/telepites_1.html:8 steps.py:261
+#: app/templates/telepites_1.html:8 steps.py:280
 msgid "Ez a gép"
 msgstr "This computer"
 
@@ -1467,7 +1467,7 @@ msgstr "This writes the summaries of YouTube videos. With a topped-up AssemblyAI
 msgid "Fejezetek"
 msgstr "Chapters"
 
-#: modes.py:15 steps.py:261
+#: modes.py:15 steps.py:280
 msgid "Felhő"
 msgstr "Cloud"
 
@@ -1565,11 +1565,11 @@ msgstr "Above this the least recently used original is deleted."
 msgid "GB"
 msgstr "GB"
 
-#: steps.py:263
+#: steps.py:282
 msgid "GPU"
 msgstr "GPU"
 
-#: steps.py:261
+#: steps.py:280
 msgid "GPU-gép"
 msgstr "GPU host"
 
@@ -1925,7 +1925,7 @@ msgstr "Done: I use the same key, the trial model: %(trial_model)s."
 msgid "Kössük össze a Skipwise-fiókoddal"
 msgstr "Let's connect it to your Skipwise account"
 
-#: steps.py:262
+#: steps.py:281
 msgid "Központ"
 msgstr "Central service"
 
@@ -2245,7 +2245,7 @@ msgstr "There is no uv on this computer to update with."
 msgid "Nincs whisper-cli ebben a mappában: {path} (whisper_cli)."
 msgstr "There is no whisper-cli in this folder: {path} (whisper_cli)."
 
-#: steps.py:262
+#: steps.py:281
 msgid "Nyelvimodell-szerver"
 msgstr "Language model server"
 
@@ -2601,7 +2601,7 @@ msgstr "Memory changed: {_num} GB (until now {_num2} GB)."
 msgid "Várjuk a jóváhagyást … (10 percig érvényes)"
 msgstr "Waiting for approval … (valid for 10 minutes)"
 
-#: captions.py:122
+#: captions.py:148
 msgid "YouTube automatikus feliratából készült: felismerési hibák lehetnek benne, és nincsenek beszélők. Jobb átirathoz válassz helyi vagy felhős átírást."
 msgstr "Made from YouTube's automatic captions: it may contain recognition errors, and it has no speakers. For a better transcript, choose local or cloud transcription."
 
@@ -3100,7 +3100,7 @@ msgstr "audio track"
 msgid "helyben"
 msgstr "locally"
 
-#: steps.py:264
+#: steps.py:283
 msgid "helyben nincs terhelés"
 msgstr "no local load"
 
@@ -3143,7 +3143,7 @@ msgstr "bad version number in the list"
 msgid "https://skipwise.app"
 msgstr "https://skipwise.app"
 
-#: steps.py:263
+#: steps.py:282
 msgid "hálózat"
 msgstr "network"
 
@@ -3338,11 +3338,11 @@ msgstr "slow"
 msgid "legalább {SMALL_LLM_VRAM_GB} GB videómemória kellene"
 msgstr "it would need at least {SMALL_LLM_VRAM_GB} GB of video memory"
 
-#: steps.py:263
+#: steps.py:282
 msgid "lemez"
 msgstr "disk"
 
-#: captions.py:110
+#: captions.py:136
 msgid "letölteni a feliratot"
 msgstr "download the subtitles"
 
@@ -3371,9 +3371,9 @@ msgstr "llm {action}: give the model's name"
 msgid "megnyitás a Skipwise-ban"
 msgstr "open in Skipwise"
 
-#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:89 llm.py:233 local.py:87
+#: cloud.py:130 cloud.py:147 gpuswap.py:62 llm.py:92 llm.py:248 local.py:87
 #: local.py:146 slides.py:101 slides.py:154 slides.py:438 slides.py:457
-#: whispercpp.py:298 worker.py:148
+#: whispercpp.py:298 worker.py:150
 msgid "megszakítva"
 msgstr "cancelled"
 
@@ -3722,7 +3722,7 @@ msgstr "{exc} Update: uv tool upgrade dwyt-runner"
 msgid "{get}/{get2}. rész"
 msgstr "part {get}/{get2}"
 
-#: steps.py:297
+#: steps.py:316
 #, python-brace-format
 msgid "{h} ó {m} p"
 msgstr "{h} h {m} min"
@@ -3772,12 +3772,12 @@ msgstr "{model} · {tokens_s:.0f} tokens/s · one summary {_minutes}"
 msgid "{model}, {where} · egy 1 órás videó {_minutes} alatt kész, beszélőkkel"
 msgstr "{model}, {where} · a 1-hour video is done in {_minutes}, with speakers"
 
-#: steps.py:296
+#: steps.py:315
 #, python-brace-format
 msgid "{m} p {s} mp"
 msgstr "{m} min {s} s"
 
-#: steps.py:294
+#: steps.py:313
 #, python-brace-format
 msgid "{s} mp"
 msgstr "{s} s"

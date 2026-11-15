@@ -2,7 +2,10 @@
 
 Exactly ONE track is requested, in the video's language: the uploader's own subtitles,
 else YouTube's automatic captions of the original audio (`<lang>-orig`; a plain `<lang>` key
-only when there is no `-orig` key). Machine translations are never used. The track comes as
+only when there is no `-orig` key). Machine translations are never used. The video's language is
+the asked one, else the language of the audio track YouTube marks original (default), else yt-dlp's
+`language`: that one follows the formats yt-dlp picked, and with auto-dubbed tracks it was the
+language of a dub (an English video came back with Arabic captions). The track comes as
 json3 and becomes sentence-sized segments without speakers. (Ported from yt-transcribe.)
 """
 from __future__ import annotations
@@ -28,11 +31,34 @@ def _script(code: str) -> str | None:
     return parts[1].title() if len(parts) > 1 and len(parts[1]) == 4 and parts[1].isalpha() else None
 
 
+ORIGINAL_PREF = 10  # yt-dlp's language_preference of the audio track YouTube marks original
+DEFAULT_PREF = 5    # ... and of the default one
+
+
+def audio_language(info: dict) -> str | None:
+    """The language of the video's original (else default) audio track; None when no track says.
+
+    An auto-dubbed video has one audio track per dub; yt-dlp's top-level `language` is that of the
+    formats it picked, which may be a dub."""
+    best: tuple[int, str] | None = None
+    for f in info.get("formats") or []:
+        lang = f.get("language")
+        if not isinstance(lang, str) or not lang or f.get("acodec") in (None, "none"):
+            continue
+        pref = f.get("language_preference")
+        note = (f.get("format_note") or "").lower()
+        if "original" in note:
+            pref = max(pref if isinstance(pref, int) else 0, ORIGINAL_PREF)
+        if isinstance(pref, int) and pref >= DEFAULT_PREF and (best is None or pref > best[0]):
+            best = (pref, lang)
+    return best[1] if best else None
+
+
 def choose_track(info: dict, language: str | None = None) -> tuple[str, str, list] | None:
     """(kind, code, formats) of the track to use, or None. kind: manual | auto."""
     manual = {k: v for k, v in (info.get("subtitles") or {}).items() if k != "live_chat"}
     auto = info.get("automatic_captions") or {}
-    lang = (language or info.get("language") or "").strip()
+    lang = (language or audio_language(info) or info.get("language") or "").strip()
     if not lang:
         origs = [k for k in auto if k.endswith("-orig")]
         if len(origs) == 1:
@@ -95,7 +121,7 @@ def run(url: str, options: dict[str, Any], cfg: Config, stage: Callable[[str], N
             media.check(info, cfg)
             track = choose_track(info, options.get("language"))
             if track is None:
-                lang = options.get("language") or info.get("language") or "ismeretlen"
+                lang = options.get("language") or audio_language(info) or info.get("language") or "ismeretlen"
                 raise WorkError(_("A videónak nincs felirata a saját nyelvén ({lang}). Válassz "
                                    "helyi vagy felhős átírást.").format(
                                   lang=lang), "next_step")
