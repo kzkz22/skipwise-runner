@@ -28,6 +28,10 @@ LLM_STAGES = {"summarize", "translate", "ask", "categorize", "chapters", "minute
 GPU_HOST = {"waiting-for-gpu", "starting", "transcribe", "align", "diarize", "load-audio"}
 
 _local = threading.local()
+# What the GPU host's Whisper worker last said it runs on ({"res": "gpu"|"cpu", "gpu": card}): the worker reports
+# its device only once it works, so the next job's plan starts from the last one (a worker set to DEVICE=cpu
+# next to an LLM that holds the card, airouter whisper.device: cpu, decision 19.39).
+HOST: dict[str, Any] = {}
 
 
 def _step(sid: str, where: str, res: str, **extra: Any) -> dict[str, Any]:
@@ -84,8 +88,10 @@ def _transcription(mode: str | None, cfg: Config, own_captions: bool = False) ->
         return [_step("prepare-audio", "this", "cpu"), _step("upload", "this", "net"),
                 _step("transcribe", "cloud", "wait", via="AssemblyAI")]
     if cfg.whisper_url:  # the GPU host behind llama-swap
+        res, card = HOST.get("res", "gpu"), HOST.get("gpu")
         return [_step("prepare-audio", "this", "cpu"), _step("waiting-for-gpu", "gpu", "wait"),
-                _step("transcribe", "gpu", "gpu"), _step("align", "gpu", "gpu"), _step("diarize", "gpu", "gpu")]
+                _step("transcribe", "gpu", res, gpu=card), _step("align", "gpu", res, gpu=card),
+                _step("diarize", "gpu", res, gpu=card)]
     card = this_gpu()
     return [_step("prepare-audio", "this", "cpu"), _step("waiting-for-gpu", "this", "wait", gpu=card),
             _step("transcribe", "this", "gpu" if card else "cpu", gpu=card), _step("diarize", "this", "cpu")]
@@ -139,10 +145,10 @@ def _effective(cfg: Config) -> Config:
 def usual_place(stage: str, cfg: Config | None = None) -> dict[str, Any]:
     if stage in TRANSFER:
         return {"where": "this", "res": "net"}
+    if stage in GPU_HOST and cfg is not None and cfg.whisper_url:  # load-audio too: the worker loads it
+        return {"where": "gpu", "res": HOST.get("res", "gpu"), "gpu": HOST.get("gpu")}
     if stage in CPU:
         return {"where": "this", "res": "cpu"}
-    if stage in GPU_HOST and cfg is not None and cfg.whisper_url:
-        return {"where": "gpu", "res": "gpu"}
     return {"where": "this", "res": "cpu"}
 
 
@@ -167,7 +173,8 @@ class Tracker:
                 if stage == "starting":  # the worker's first moment: no step of its own
                     return
                 place = dict(self.current or {}) if stage in GPU_HOST and self.current and \
-                    self.current.get("where") == "gpu" else usual_place(stage, self.cfg)
+                    self.current.get("where") == "gpu" and self.current.get("res") != "wait" \
+                    else usual_place(stage, self.cfg)
                 found = _step(stage, place.get("where", "this"), place.get("res", "cpu"),
                               gpu=place.get("gpu"))
                 at = next((i for i, s in enumerate(self.steps) if s["state"] == "next"), len(self.steps))
@@ -194,6 +201,17 @@ class Tracker:
                     target.pop("gpu", None)
                     continue
                 target[key] = str(value)[:60] if isinstance(value, str) else value
+            if step is None and target.get("where") == "gpu" and info.get("res") in ("gpu", "cpu"):
+                # the GPU host's worker said where it works: its steps still to come run there too
+                HOST.clear()
+                HOST.update({"res": info["res"]}, **({"gpu": target["gpu"]} if target.get("gpu") else {}))
+                for later in self.steps:
+                    if later["state"] == "next" and later["where"] == "gpu" and later["res"] in ("gpu", "cpu"):
+                        later["res"] = info["res"]
+                        if target.get("gpu"):
+                            later["gpu"] = target["gpu"]
+                        else:
+                            later.pop("gpu", None)
 
     def _close(self) -> None:
         if self.current is not None:

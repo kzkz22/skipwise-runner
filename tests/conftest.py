@@ -446,13 +446,14 @@ class FakeWhisper:
             async def lines():
                 import asyncio
                 import json as _json
+                on = {"device": "cuda", "gpu": "RTX 3090"} if fake.device == "cuda" else {"device": "cpu"}
                 for stage in ("waiting-for-gpu", "transcribe", "diarize"):
-                    yield _json.dumps({"stage": stage, "device": "cuda", "gpu": "RTX 3090"}) + "\n"
+                    yield _json.dumps({"stage": stage, **on}) + "\n"
                     await asyncio.sleep(fake.delay)
                 if fake.error:
                     yield _json.dumps({"error": fake.error}) + "\n"
                 elif not fake.cut:
-                    yield _json.dumps({"result": {"language": "hu", "device": "cuda", "gpu": "RTX 3090",
+                    yield _json.dumps({"result": {"language": "hu", **on,
                                                   "diarized": True, "warnings": [], "segments": [
                         {"start": 0.5, "end": 2.0, "text": " Jó napot. ", "speaker": "SPEAKER_01"},
                         {"start": 2.2, "end": 4.0, "text": "Köszönöm.", "speaker": "SPEAKER_00"}]}}) + "\n"
@@ -464,6 +465,7 @@ class FakeWhisper:
 
     def reset(self) -> None:
         self.requests, self.status, self.detail, self.error, self.cut, self.delay = [], 200, "", "", False, 0.0
+        self.device = "cuda"  # "cpu": a worker set to DEVICE=cpu (decision 19.39)
 
 
 @pytest.fixture(scope="session")
@@ -541,7 +543,8 @@ def remote_key_pem() -> bytes:
 def isolated(tmp_path, monkeypatch, central, assembly, llm, whisper, audio_file, remote_key_pem):
     import keyring
 
-    from dwyt_runner import keystore
+    from dwyt_runner import keystore, steps
+    steps.HOST.clear()
     KEYRING.backend.data.clear()
     keyring.set_keyring(KEYRING.backend)
     keystore.reset()
