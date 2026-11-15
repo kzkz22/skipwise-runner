@@ -159,3 +159,18 @@ def test_the_window_switch(monkeypatch):
     assert config.load().remote_settings == "on" and remote.enabled(config.load())
     client.post("/mukodes/tavoli", data={"csrf": token})
     assert config.load().remote_settings == "off"
+
+
+def test_a_new_release_is_seen_within_the_hour(monkeypatch):
+    """The Update now button on the central shows only when the runner reports a newer version; a daily check
+    kept it hidden for up to a day after a release (0.28.2)."""
+    import time
+
+    from dwyt_runner import updater
+    calls = []
+    monkeypatch.setattr(updater, "signed", lambda: True)
+    monkeypatch.setattr(updater, "check", lambda: calls.append(1) or updater.STATE.update(latest="9.9.9",
+                                                                                           checked=time.time()))
+    updater.STATE.update(latest="0.0.1", checked=time.time() - 2 * 3600)
+    assert remote.latest_version() == "9.9.9" and calls == [1]
+    assert remote.latest_version() == "9.9.9" and calls == [1]  # not again within the hour

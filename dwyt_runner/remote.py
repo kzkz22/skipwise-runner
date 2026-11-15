@@ -32,7 +32,7 @@ log = logging.getLogger("dwyt-runner")
 APP = False  # set by the desktop app: "auto" means off there
 SOURCE = "https://github.com/kzkz22/skipwise-runner/archive/refs/heads/main.zip"
 VERSION_URL = "https://raw.githubusercontent.com/kzkz22/skipwise-runner/main/pyproject.toml"
-LATEST_EVERY_S = 24 * 3600
+LATEST_EVERY_S = 3600  # with every hourly report: the Update now button shows within the hour (0.28.2)
 REPORT_EVERY_S = 3600
 RESTART_EXIT = 75  # systemd (Restart=on-failure) starts the new version
 MODE_TEXT = labels({"felho": N_("átírás felhőben (AssemblyAI), összefoglaló felhőben"),
@@ -132,11 +132,13 @@ def mode_presets(cfg: Config) -> list[dict[str, Any]]:
 
 
 def latest_version(timeout: float = 10) -> str:
-    """The newest version an update would install, checked once a day; '' if unknown. With the project's key:
-    the newest signed release; before that the source's main branch."""
+    """The newest version an update would install, checked hourly (once a day kept the central's Update now
+    button hidden for up to a day after a release); '' if unknown. With the project's key: the newest signed
+    release (a small file on GitHub's release downloads, no API quota); before that the source's main branch.
+    Installing on its own (auto_update) still follows the updater's daily check."""
     from . import updater
     if updater.signed():
-        if updater.due(None):
+        if time.time() - updater.STATE["checked"] >= LATEST_EVERY_S:
             updater.check()
         return updater.STATE["latest"]
     if time.time() - _latest["at"] < LATEST_EVERY_S:

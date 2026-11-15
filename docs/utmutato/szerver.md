@@ -25,7 +25,7 @@ Az egysoros telepítő rendszergazdaként a Tesseractot is telepíti a rendszer 
 
 ## Frissítés
 
-Ha van újabb változat, a Skipwise Futtatók oldalán a kártyán megjelenik a **Frissítés most** gomb: a futtató két munka között telepíti az aláírt kiadást, és újraindul. A szerveren kézzel: `skipwise-runner update` (`--check`: csak megnézi, `--back`: vissza az előzőre; rendszergazdaként telepítve a fenti `runuser …` előtaggal), utána `systemctl restart dwyt-runner`. Ha azt szeretnéd, hogy magától frissüljön: Beállítás → „A futtató frissítése magától” → be.
+Ha van újabb változat, a Skipwise Futtatók oldalán a kártyán megjelenik a **Frissítés most** gomb (a futtató óránként néz rá, tehát egy kiadás után legfeljebb egy órán belül; csak akkor, ha a távoli beállítás be van kapcsolva): a futtató két munka között telepíti az aláírt kiadást, és újraindul. A szerveren kézzel: `skipwise-runner update` (`--check`: csak megnézi, `--back`: vissza az előzőre; rendszergazdaként telepítve a fenti `runuser …` előtaggal), utána `systemctl restart dwyt-runner`. Ha azt szeretnéd, hogy magától frissüljön: Beállítás → „A futtató frissítése magától” → be.
 
 ## Napló, leállítás, eltávolítás
 
