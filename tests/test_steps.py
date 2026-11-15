@@ -85,6 +85,35 @@ def test_a_local_job_reports_the_gpu_hosts_card(cfg, central, whisper, monkeypat
     assert any(p.get("duration_s") == 120 for p in beats)  # the recording's length, once known (19.36)
 
 
+def test_a_gpu_host_on_the_cpu_moves_its_later_steps_and_the_next_plan(cfg, central, whisper, monkeypatch):
+    # the worker reports its device with its first stage: the planned GPU steps follow, the next plan starts there
+    cfg.whisper_url = whisper.url
+    t = steps.Tracker(steps._transcription("local", cfg), cfg)
+    t.enter("waiting-for-gpu")
+    t.enter("load-audio")  # not planned: the worker loads it, so the GPU host's place (not this machine's)
+    t.note(res="cpu", gpu="")
+    rows = {r["id"]: r for r in t.payload()}
+    assert rows["load-audio"]["where"] == "gpu" and rows["load-audio"]["res"] == "cpu"
+    assert all(rows[i]["res"] == "cpu" and "gpu" not in rows[i] for i in ("transcribe", "align", "diarize"))
+    assert steps.HOST == {"res": "cpu"}
+
+    from dwyt_runner import worker
+    stage = worker.Job.stage
+    monkeypatch.setattr(worker.Job, "stage", lambda self, name: (stage(self, name), self.beat()))
+    monkeypatch.setattr(whisper, "device", "cpu")
+    yt_dlp.REGISTRY["videos"][VIDEO] = _video()
+    central.add_job(92, "transcribe", {"source": {"kind": "youtube", "url": VIDEO},
+                                       "options": {"mode": "local", "model": "large-v3", "language": "hu"}})
+    _run_once(cfg, central)
+    beats = [p for j, p in central.progress if j == 92]
+    first = {s["id"]: s for s in beats[0]["steps"]}
+    assert first["diarize"]["res"] == "cpu" and "gpu" not in first["diarize"]  # planned from the last job
+    ran = {s["id"]: s for s in central.results[92]["steps"]}
+    assert all(ran[i]["where"] == "gpu" and ran[i]["res"] == "cpu" and "gpu" not in ran[i]
+               for i in ("transcribe", "diarize"))
+    steps.HOST.clear()
+
+
 def test_every_result_carries_its_steps(cfg, central, llm):
     from test_runner import _translate_job
     _translate_job(central, 91)
