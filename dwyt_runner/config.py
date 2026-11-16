@@ -90,6 +90,11 @@ class Config:
     # (dwyt-airouter's LiteLLM does): "name=description; name2=description"
     llm_model_notes: dict[str, str] = field(default_factory=dict)
     llm_reasoning: str = "auto"  # OpenRouter models: auto (the model's default) | on | off
+    # thinking per use (decision 19.43): auto (the model's own / llm_reasoning) | on | off; local servers too
+    llm_thinking_public: str = "auto"
+    llm_thinking_private: str = "auto"
+    llm_thinking_translate: str = "off"  # translating rarely gains from thinking, and a thinking loop costs minutes
+    llm_thinking_ask: str = "auto"
     # which sites this runner downloads from ("*" = any)
     allowed_domains: list[str] = field(default_factory=lambda: list(DEFAULT_DOMAINS))
     cookies_file: str = ""
