@@ -152,16 +152,50 @@ def thinking_of(row: dict[str, Any], setting: str) -> bool | None:
     return reasoning.get("default_enabled") if isinstance(reasoning.get("default_enabled"), bool) else None
 
 
-def request_extra(cfg: Config, model: str) -> dict[str, Any]:
-    """The request field for llm_reasoning (OpenRouter only; 'auto' sends nothing). A model that always thinks
-    is never asked not to: it would refuse the request."""
-    if cfg.llm_reasoning not in ("on", "off") or "openrouter.ai" not in (cfg.llm_url or ""):
+USES = ("public", "private", "translate", "ask")
+
+
+def use_of(kind: str, role: str | None) -> str:
+    """Which thinking setting a job follows: translations and questions have their own, else the role's."""
+    if kind in ("translate", "ask"):
+        return kind
+    return "private" if role == "private" else "public"
+
+
+def thinking_setting(cfg: Config, use: str) -> str:
+    value = getattr(cfg, f"llm_thinking_{use}", "auto") if use in USES else "auto"
+    return value if value in ("auto", "on", "off") else "auto"
+
+
+def request_extra(cfg: Config, model: str, use: str = "public") -> dict[str, Any]:
+    """The request fields that switch thinking for this use (decision 19.43); 'auto' sends nothing.
+
+    OpenRouter: `reasoning.enabled` (an auto use follows llm_reasoning); a model that always thinks is never asked
+    not to, it would refuse the request. AssemblyAI's gateway: nothing. Any other OpenAI-compatible server (the
+    owner's LiteLLM in front of vLLM / llama-server): the Qwen chat template switch `chat_template_kwargs.
+    enable_thinking`, sent only when it changes something the model info tells (LiteLLM replaces the model's own
+    chat_template_kwargs with the request's, so "on" for a model that thinks anyway would drop its reasoning_effort).
+    The runner's own Ollama / LM Studio are not switched (they do not take these fields)."""
+    url = cfg.llm_url or ""
+    setting = thinking_setting(cfg, use)
+    if "openrouter.ai" in url:
+        setting = cfg.llm_reasoning if setting == "auto" else setting
+        if setting not in ("on", "off"):
+            return {}
+        row = openrouter_models_cached(cfg).get(model) or {}
+        reasoning = row.get("reasoning") if isinstance(row.get("reasoning"), dict) else {}
+        if setting == "off" and reasoning.get("mandatory") is True:
+            return {}
+        return {"reasoning": {"enabled": setting == "on"}}
+    if setting == "auto" or not url:
         return {}
-    row = openrouter_models_cached(cfg).get(model) or {}
-    reasoning = row.get("reasoning") if isinstance(row.get("reasoning"), dict) else {}
-    if cfg.llm_reasoning == "off" and reasoning.get("mandatory") is True:
+    from . import gateway, localllm
+    if gateway.is_gateway(url) or localllm.uses_local(cfg):
         return {}
-    return {"reasoning": {"enabled": cfg.llm_reasoning == "on"}}
+    thinks = (cached(cfg)[0].get(model) or {}).get("thinking")
+    if (setting == "on" and thinks is True) or (setting == "off" and thinks is False):
+        return {}
+    return {"chat_template_kwargs": {"enable_thinking": setting == "on"}}
 
 
 _models_cache: dict[str, Any] = {"at": 0.0, "url": "", "value": {}}

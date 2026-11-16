@@ -113,17 +113,34 @@ SETTINGS: tuple[Setting, ...] = (
       "LLM Gateway-nél nem kell: ott az AssemblyAI-kulcs írja az összefoglalót is.")),
     S("llm_reasoning", "choice", "llm", N_("Gondolkodás (felhős modellnél)"), N_("OpenRouter-modelleknél: a modell a "
       "válasz előtt végiggondolja a feladatot. Alaposabb, de lassabb és drágább (a gondolkodás is fizetős token). "
-      "Ahol a modell mindig gondolkodik, ott nem kapcsolható ki."),
+      "Ahol a modell mindig gondolkodik, ott nem kapcsolható ki. A feladatonkénti gondolkodás-beállítások ezt "
+      "felülírják."),
       choices=(("auto", N_("a modell alapértelmezése")), ("on", N_("be")), ("off", N_("ki")))),
     S("llm_public_model", "text", "llm", N_("Modell a nyilvános videókhoz"), N_("Ezzel készül a YouTube-videók "
       "összefoglalója. Az AssemblyAI-nál feltöltött egyenleggel nagyobb modell is választható (a nevek az AssemblyAI "
       "LLM Gateway modell-listáján).")),
+    S("llm_thinking_public", "choice", "llm", N_("Gondolkodás a nyilvános videóknál"), N_("Felülírja a modell beállítását ennél a "
+      "feladatnál. Saját LLM-szervernél (például LiteLLM előtt vLLM vagy llama.cpp) és OpenRouternél működik; az "
+      "Ollamán és az LM Studión nem kapcsolható."),
+      choices=(("auto", N_("a modell alapértelmezése")), ("on", N_("be")), ("off", N_("ki")))),
     S("llm_private_model", "text", "llm", N_("Modell a saját felvételekhez"), N_("A saját felvételek szövege csak ehhez a "
       "modellhez kerül; helyi modell javasolt.")),
+    S("llm_thinking_private", "choice", "llm", N_("Gondolkodás a saját felvételeknél"), N_("Felülírja a modell beállítását ennél a "
+      "feladatnál. Saját LLM-szervernél (például LiteLLM előtt vLLM vagy llama.cpp) és OpenRouternél működik; az "
+      "Ollamán és az LM Studión nem kapcsolható."),
+      choices=(("auto", N_("a modell alapértelmezése")), ("on", N_("be")), ("off", N_("ki")))),
     S("llm_translate_model", "text", "llm", N_("Modell a fordításhoz"), N_("Üresen a nyilvános videók modellje."),
       advanced=True),
+    S("llm_thinking_translate", "choice", "llm", N_("Gondolkodás a fordításnál"), N_("Fordításnál a gondolkodás "
+      "ritkán javít, de lassít, és egy gondolkodási hurok perceket vehet el, ezért alapból ki. Saját LLM-szervernél "
+      "és OpenRouternél működik; az Ollamán és az LM Studión nem kapcsolható."),
+      choices=(("auto", N_("a modell alapértelmezése")), ("on", N_("be")), ("off", N_("ki"))), advanced=True),
     S("llm_ask_model", "text", "llm", N_("Modell a kérdésekhez"), N_("Üresen a nyilvános videók modellje; egy gondolkodó "
       "modell itt jobb válaszokat ad."), advanced=True),
+    S("llm_thinking_ask", "choice", "llm", N_("Gondolkodás a kérdéseknél"), N_("Felülírja a modell beállítását ennél a "
+      "feladatnál. Saját LLM-szervernél (például LiteLLM előtt vLLM vagy llama.cpp) és OpenRouternél működik; az "
+      "Ollamán és az LM Studión nem kapcsolható."),
+      choices=(("auto", N_("a modell alapértelmezése")), ("on", N_("be")), ("off", N_("ki"))), advanced=True),
     S("llm_models", "list", "llm", N_("További választható modellek (nyilvános)"), N_("Ezek közül is választhatsz az elem "
       "oldalán."), advanced=True),
     S("llm_private_models", "list", "llm", N_("További választható modellek (saját felvételek)"), N_("Csak amit ide "

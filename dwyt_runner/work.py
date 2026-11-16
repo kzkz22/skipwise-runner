@@ -360,7 +360,7 @@ def run(job: dict[str, Any], cfg: Config, stage: Callable[[str], None],
         context = context or gateway.context(cfg.llm_url, model)  # AssemblyAI's trial model: 32K
         if localllm.uses_local(cfg):
             localllm.mark_used(model)
-        extra = {} if localllm.uses_local(cfg) else modelinfo.request_extra(cfg, model)
+        extra = {} if localllm.uses_local(cfg) else modelinfo.request_extra(cfg, model, modelinfo.use_of(kind, role))
         from .llm import LOCAL_STALL_S, STALL_S
         llm = Llm(cfg.llm_url, cfg.llm_key, extra=extra,
                   stall_s=LOCAL_STALL_S if localllm.uses_local(cfg) else STALL_S,

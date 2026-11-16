@@ -447,7 +447,7 @@ def run(video: str, options: dict[str, Any], cfg: Config, workdir: str, role: st
         from .llm import Llm
         from .modelinfo import request_extra
         llm = Llm(llm_cfg.llm_url, llm_cfg.llm_key, extra={} if localllm.uses_local(llm_cfg) else
-                  request_extra(llm_cfg, model))
+                  request_extra(llm_cfg, model, "private" if role == "private" else "public"))
         stage("vision")
         out.vision = model
         hungarian = language_names.is_source(language or "hu")

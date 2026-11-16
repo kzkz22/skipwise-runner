@@ -250,6 +250,46 @@ def test_translate_models_by_role(cfg, central, llm):
     assert [c["model"] for c in llm.calls] == ["forditas", "osszefoglalo-helyi"]
 
 
+def test_thinking_is_switched_per_use_on_an_own_llm_server(cfg, central, llm, monkeypatch):
+    # decision 19.43: the model keeps thinking in its own settings; a use's setting may switch it per request
+    from dwyt_runner import modelinfo
+    info = {"osszefoglalo": {"where": "local", "thinking": True}, "forditas": {"where": "local", "thinking": False}}
+    monkeypatch.setattr(modelinfo, "cached", lambda cfg: (info, "LiteLLM"))
+    assert cfg.llm_thinking_translate == "off" and cfg.llm_thinking_public == "auto"  # the defaults
+    off = {"chat_template_kwargs": {"enable_thinking": False}}
+    assert modelinfo.request_extra(cfg, "osszefoglalo", "translate") == off
+    assert modelinfo.request_extra(cfg, "forditas", "translate") == {}  # does not think anyway
+    assert modelinfo.request_extra(cfg, "osszefoglalo", "public") == {}  # auto: the model's own setting
+    cfg.llm_thinking_ask = "on"
+    assert modelinfo.request_extra(cfg, "osszefoglalo", "ask") == {}  # thinks anyway: keep its own kwargs
+    assert modelinfo.request_extra(cfg, "forditas", "ask") == {"chat_template_kwargs": {"enable_thinking": True}}
+    assert modelinfo.request_extra(cfg, "ismeretlen", "translate") == off  # unknown model: told
+    assert [modelinfo.use_of(k, r) for k, r in (("translate", "private"), ("ask", "public"), ("summarize",
+            "private"), ("minutes", "public"))] == ["translate", "ask", "private", "public"]
+    # the request carries it (a translation of the public model)
+    _translate_job(central, 33)
+    _run_once(cfg, central)
+    assert llm.calls[-1]["model"] == "osszefoglalo"
+    assert llm.calls[-1]["chat_template_kwargs"] == {"enable_thinking": False}
+    cfg.llm_thinking_translate = "auto"
+    _translate_job(central, 34)
+    _run_once(cfg, central)
+    assert "chat_template_kwargs" not in llm.calls[-1]
+
+
+def test_thinking_per_use_on_openrouter_and_never_on_the_gateway(cfg, monkeypatch):
+    from dwyt_runner import modelinfo
+    rows = {"q": {"id": "q", "reasoning": {"default_enabled": True, "mandatory": False}},
+            "always": {"id": "always", "reasoning": {"mandatory": True}}}
+    monkeypatch.setattr(modelinfo, "openrouter_models_cached", lambda cfg: rows)
+    cfg.llm_url, cfg.llm_reasoning = "https://openrouter.ai/api/v1", "on"
+    assert modelinfo.request_extra(cfg, "q", "public") == {"reasoning": {"enabled": True}}  # auto: llm_reasoning
+    assert modelinfo.request_extra(cfg, "q", "translate") == {"reasoning": {"enabled": False}}  # the use wins
+    assert modelinfo.request_extra(cfg, "always", "translate") == {}  # it would refuse the request
+    cfg.llm_url = "https://llm-gateway.assemblyai.com/v1"
+    assert modelinfo.request_extra(cfg, "q", "translate") == {}
+
+
 # ---- own recordings -----------------------------------------------------------------------
 
 def _sha(data: bytes) -> str:
